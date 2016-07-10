@@ -1,0 +1,123 @@
+---
+title: "Análise de Dados dos Gastos Parlamentares"
+author: "Arthur Sampaio"
+date: "10 de julho de 2016"
+output: html_document:
+        theme: readable
+        toc: true
+        toc_float: true
+        fig_width: 5
+        fig_height: 4
+---
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+## Resumo
+
+Neste relatório analisei informaçõess referentes aos gastos das Cotas para Exercício dos parlamentares Paraibanos durante o corrente ano, 2016. Estes dados estão dispononíveis na trasparência da Câmera Federal disponível em <http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar>. A análise, feita na linguagem de programação R, tem o objetivo de investigar como os Deputados Federais Paraibanos gastam suas cots Parlamentares.  
+
+
+## Introdução 
+
+Os deputados federais sãoo eleitos com o intuito de representar os interesses da população a nível legislativo e assim contribuir para o engradecimento do Estado. Para isso, cada deputado tem uma cota mensal para cobrir as despesas referentes ao exercício parlamentar, como: Passagens, telefonia, contratação de pessoal, divulgação da atividade parlamentar, entre outros.  
+
+O valor da cota parlamentar é diferente para cada estado da União, porque leva em consideração o custo referente a passagens aéreas para os diferentes estados. Para o estado da Paraiba temos a seguinte cota: 
+
+      UF       |   VALOR DA COTA R$
+-------------- | --------------------
+      PB       |      42.032,56
+
+
+Diante de uma das maiores crises da política brasileira, aonde deputados são acusados constantemente de corrupção, analisar como gastam o dinheiro da União é uma atividade fundamental de cidadania. 
+
+Neste relatório tenho o objetivo de responder duas questões a cerca dos gastos parlamentares:
+
+1. Em que tipo de despesas nossos parlamentares gastam mais recursos de sua cota?
+2. Quais tipos de despesas têm despesas que mais variam, que têm valores mais desiguais?
+
+Para respondê-las este artigo foi dividido em algumas seções: 
+
+* Os Dados
+* Processamento dos Dados
+* Resultados
+* Referências 
+
+##  Os Dados 
+
+Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no link <https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz>. O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluindo quando e onde ocorreu os gastos, o valor do documento e nome do deputado.
+
+## Processamento dos Dados
+
+Após clonar o repositório e extrair o banco de dados o mesmo foi lido e setado a uma variável 
+
+A data da análise é mostrada a seguir: 
+```{r}
+      dataDaAnalise = date()
+      dataDaAnalise
+```
+
+
+###### Leitura dos arquivos
+```{r}
+gastosDeputadosBr = read.csv("D:\\Users\\PET Computacao\\Documents\\sampaio\\DataAnalysisI\\gastosDeputados\\ano-atual.csv",
+                             comment.char = "#",
+                             encoding = "UTF-8")
+```
+
+A estrutura de entrada é visualizada
+
+```{r}
+  str(gastosDeputadosBr)
+```
+
+As variáveis consideradas na análise foram:
+* txNomeParlamentar
+* sgPartido
+* sgUF
+* vlrLiquido (O seu conteúdo é valor que será realmente descontado ou acrescentado à cota)
+* txtDescricao (O seu conteúdo é a descrição do Tipo de Despesa relativo à despesa em questão.))
+
+As dez primeiras linhas dessas variáveis são mostradas a seguir: 
+
+```{r}
+    #Seleciona as variáveis que serão utilizadas
+    gastosDeputadosPB <- select(gastosDeputadosBr, sgUF ,sgPartido , txNomeParlamentar, vlrLiquido, txtDescricao, numMes)
+    
+    #Filtra apenas os deputados paraibanos
+    gastosDeputadosPB = gastosDeputadosPB %>% filter(sgUF == "PB")
+```
+
+Para facilitar a análise o nome das variáveis foram renomeadas para melhor analisá-las
+
+```{r}
+    names(gastosDeputadosPB) <- c("UF", "Partido", "Nome", "ValorGasto", "Descricao", "Mes")
+    #Imprime as dez primeiras linhas  
+    head(gastosDeputadosPB,10)
+```
+
+### Como varia os gastos dos deputados? 
+
+Os valores dos gastos dos parlamentares paraibanos variam entre R$ -2.820,00 e R$ 41.890,00. 
+
+O valor negativo significa que a despesa é um bilhete de compensação de viagem área, significando que o referido valor compensa um outro bilhete emitido e não utilizado pelo deputado. Já o outro extremo, onde a despesa é de mais de 41 mil reais, refere-se ao gasto do _Deputado Benjamin Maranhão_ com divulgação parlamentar no mês de Maio.   
+
+Como os valores variam grotescamente, é plotado um gráfico monolog para ajudar na visualização. 
+
+```{r}
+  summary(gastosDeputadosPB$ValorGasto)
+
+  ggplot(gastosDeputadosPB, mapping = aes(x = ValorGasto)) + 
+    geom_histogram(bins = 100) + 
+    geom_rug(alpha = .3) +
+    scale_x_log10()
+```
+
+Para avaliar a dispersão dos valores gastos nas cotas
+
+Inicialmente, é interessante visualizar qual deputado gasta mais sua cota parlamentar 
+
+groupedby = group_by(gastosDeputadosPB, Nome)
+> summarise(groupedby, sum(ValorGasto))

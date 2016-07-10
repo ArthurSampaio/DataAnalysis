@@ -1,0 +1,3 @@
+Focado no uso de estátistica para a análise de dados e em técnicas de mineração de dados e recomendação. 
+Com o intuito de aprender a descrever, comparar, agrupar, classificar dados, além de identificar relações e prever tendência
+e gerar recomendações. 
