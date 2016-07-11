@@ -1,6 +1,6 @@
 ---
 title: "Análise de Dados dos Gastos Parlamentares"
-author: "Arthur Sampaio"
+author: ""
 date: "11 de Julho"
 output: html_document
         
@@ -21,10 +21,8 @@ Os deputados federais são eleitos com o intuito de representar os interesses da
 
 O valor da cota parlamentar é diferente para cada estado da União, porque leva em consideração o custo referente a passagens aéreas para os diferentes estados da federaça ao o. Para o estado da Paraiba temos a seguinte cota: 
 
-      UF       |   VALOR DA COTA R$
+      PB       |    R$ 42.032,56
 -------------- | --------------------
-      PB       |      42.032,56      
--------------- | --------------------       
 
 Logo,
 
@@ -44,8 +42,8 @@ Para respondê-las este artigo foi dividido em algumas seções:
 
 * Os Dados
 * Processamento dos Dados
-* Resultados
-* Conclusao
+* Respostas as questões
+* Algumas Palavras
 * Referências 
 
 ##  Os Dados 
@@ -125,7 +123,15 @@ Os valores estão muito concentrados a esquerda do gráfico, assimétricos , al�
     scale_x_log10()
 ```
 
-Os valores são mais concentrados em R$190,00 e 75% dos gastos são inferiores há R$650,00. Contudo, o desvio padrão apresenta um valor de R$2184,16 evidenciando que os valores são muito dispersos. 
+Os valores são mais concentrados próximos à mediana (R$190,00) e 75% dos gastos são inferiores há R$650,00. Contudo, o desvio padrão apresenta um valor de R$2184,16 evidenciando que os valores são muito dispersos. 
+
+```{r}
+   ValorTotal <-  gastosDeputadosPB %>% summarise(sum(ValorGasto))  
+
+    ggplot(gastosDeputadosPB, mapping = aes(x = ValorTotal/1e4, y = ValorGasto/1e3, width = .5)) + 
+    geom_violin() + xlab("Valor Total(em dez mil reais)") + ylab("Valores das Despesas (em mil reais)")
+    
+```
 
 O valor negativo significa que a despesa é um bilhete de compensação de viagem área, significando que o referido valor compensa um outro bilhete emitido e não utilizado pelo deputado. Já o outro extremo, onde a despesa é de mais de 41 mil reais, refere-se ao gasto do _Deputado Benjamin Maranhão_ com divulgação parlamentar no mês de Maio.
 
@@ -158,9 +164,9 @@ Diante disto, para responder a dúvida acima, foi calculado o valor total gasto 
 Assim, nenhum deputado excedeu o total da Cota Parlamentar para os seis primeiros meses do ano. 
 
 
-# Respostas da Questões  
+## Respostas da Questões  
 
-## Em que tipo de despesas nossos parlamentares gastam mais recursos de sua cota?
+### Em que tipo de despesas nossos parlamentares gastam mais recursos de sua cota?
 
 Para responder tal questão, foi preciso plotar o gráfico onde a Descrição dos Gastos e seus respectivos valores estejam contidos. 
 
@@ -170,7 +176,7 @@ Para responder tal questão, foi preciso plotar o gráfico onde a Descrição do
                              fill = Descricao, width = .4)) + 
   geom_bar(stat = "identity") + 
   theme(legend.position="none")+
-  xlab("Tipos de Despesas") + ylab("Valor (em mil) em reais") + ggtitle("Gastos com Despesas dos Deputados") + 
+  xlab("Tipos de Despesas") + ylab("Valor (em mil) em reais") + 
   coord_flip()
 ```
 
@@ -216,11 +222,7 @@ Para as despesas áreas, temos:
 ```
 
 O deputado que mais gastou com despesas aéreas foi o _Deputado Damião Feliciano (PDT)_ com um valor total de R$ 38.558,75. Já o que poupou mais o bolso do brasileiro foi o _Deputado Marcondes Gadelha (PSC)_ com um gasto total de  R$ 6.824,09.
-theme: readable
-        toc: true
-        toc_float: true
-        fig_width: 5
-        fig_height: 4
+
 ```{r}
     despesaAerea %>% filter(Nome == "DAMIÃO FELICIANO") %>% summarise(despesaComPassagens = sum(ValorGasto))
 ```
@@ -231,31 +233,61 @@ theme: readable
 
 
 
-##  Quais tipos de despesas têm despesas que mais variam, que têm valores mais desiguais?
+###  Quais tipos de despesas têm despesas que mais variam, que têm valores mais desiguais?
        
+O variância é uma medida utilizada por nós, analístas, para determinar a dispersão dos valores, ou seja, quão longe os valores estão do valor esperado. Assim, foi calculado a variância de cada despesa e plotado um gráfico para ajudar na determinação das variáveis que mais variam, ou seja, que tem o maior valor de variância. 
 
 ```{r}
-    ggplot(gastosDeputadosPB, mapping = aes(x = Descricao, y = ValorGasto/1e3, fill = Descricao, width = 0.2, aplha = 0.1 )) +
+  varianciaTotal = gastosDeputadosPB %>% group_by(Descricao) %>% summarise(variancia = var(ValorGasto))
+  varianciaTotal
+```
+
+```{r}
+
+ggplot(varianciaTotal, mapping = aes(x = Descricao, y = variancia/1e3, fill = Descricao, width = 0.4, aplha = 0.4 )) +
       theme(legend.position = "none") +
-      xlab("Tipos de Despesas") + ylab("Valor dos Gastos (em mil reais)") +
-      geom_boxplot() +
+      xlab("Despesas") + ylab("Variância (em mil reais)") +
+      geom_bar(stat = "identity") + ggtitle("Variância por Despesa") +
       coord_flip()
 ```
 
-
+Pelo gráfico plotado acima é possível visualizar que as despesas que apresentam a maior variação são de Divulgação Parlamentar e Consultorias, Pesquisas e Trabalhos Técnicos. 
 
 ```{r}
-  ggplot (gastosDeputadosPB, mapping = aes(y = ValorGasto, 
-                                          x = (Descricao), 
-                                         width = .4, fill = Descricao)) +
-        geom_boxplot() + 
-        geom_point() +
-        theme(legend.position="none") +  # Não precisamos da legenda da cor 
-        ylab("Valor das iniciativas") + xlab("Despesas Parlamentares")
-        
+  divulParlamentar = gastosDeputadosPB %>% group_by(Descricao) %>% filter(Descricao == "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.")
+  ggplot(divulParlamentar, mapping = aes(x = Descricao, 
+                             y = ValorGasto)) + ggtitle("Dispersão") +
+  geom_boxplot()
+  summary(divulParlamentar$ValorGasto)
 ```
+
+Os valores variam vertiginosamente para a divulgação parlamentar de valores de R$334,30 até R$41.890,00. Além disto, 75% dos valores estão abaixo de cinco mil reais. 
+Com o mesmo pensamento para Consultorias Técnicas, temos: 
+
+```{r}
+consulTecnica = gastosDeputadosPB %>% group_by(Descricao) %>% filter(Descricao == "CONSULTORIAS, PESQUISAS E TRABALHOS TÉCNICOS.")
+  ggplot(consulTecnica, mapping = aes(x = Descricao, 
+                             y = ValorGasto)) + ggtitle("Dispersão") +
+  geom_boxplot()
+  summary(consulTecnica$ValorGasto)
+
+```
+
+Para os gastos com Consultoria Técnica temos que os valores variam de R$166,00 até R$12.000,00.
+
+
+## Algumas Palavras
+
+Durante a elaboração do relatório enfrentei inúmeras dificuldades no que tange tanto à linguagem de programação quanto relacionar valores de medidas a situações que acontecem no nosso mundo. 
+
+Além disto, foi possível perceber o quanto os gastos com as despesas variam para os Deputados de uma mesma unidade federativa, o que levanta a questão: Será mesmo necessário uma cota de mais de 42 mil reais para os nossos representantes custearem seus trabalhos?
+
+
 
 
 ## Referências 
 
-[ATO DA MESA, Numero 43] (http://www2.camara.leg.br/legin/int/atomes/2009/atodamesa-43-21-maio-2009-588364-publicacaooriginal-112820-cd-mesa.html)
+[ATO DA MESA, Numero 43](http://www2.camara.leg.br/legin/int/atomes/2009/atodamesa-43-21-maio-2009-588364-publicacaooriginal-112820-cd-mesa.html)
+
+[R for Data Science](http://r4ds.had.co.nz/introduction.html#prerequisites)
+  
