@@ -1,13 +1,9 @@
 ---
 title: "Análise de Dados dos Gastos Parlamentares"
 author: "Arthur Sampaio"
-date: "10 de julho de 2016"
-output: html_document:
-        theme: readable
-        toc: true
-        toc_float: true
-        fig_width: 5
-        fig_height: 4
+date: "11 de Julho"
+output: html_document
+        
 ---
 ```{r}
 library(dplyr, warn.conflicts = FALSE)
@@ -17,18 +13,24 @@ theme_set(theme_bw())
 
 ## Resumo
 
-Neste relatório analisei informaçõess referentes aos gastos das Cotas para Exercício dos parlamentares Paraibanos durante o corrente ano, 2016. Estes dados estão dispononíveis na trasparência da Câmera Federal disponível em <http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar>. A análise, feita na linguagem de programação R, tem o objetivo de investigar como os Deputados Federais Paraibanos gastam suas cots Parlamentares.  
+Neste relatório analisei informaçõess referentes aos gastos das Cotas para Exercício dos parlamentares Paraibanos durante o corrente ano, 2016. Estes dados estão dispononíveis na trasparência da Câmera Federal disponível em <http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar>. A análise, feita na linguagem de programação R, tem o objetivo de investigar como os 13 Deputados Federais Paraibanos gastam suas cotas Parlamentares.  
 
+# Introdução 
 
-## Introdução 
+Os deputados federais são eleitos com o intuito de representar os interesses da população a nível legislativo e assim contribuir para o engradecimento do Estado. Para isso, cada deputado tem uma cota mensal para cobrir as despesas referentes ao exercício parlamentar, como: Passagens, telefonia, contratação de pessoal, divulgação da atividade parlamentar, entre outros.  
 
-Os deputados federais sãoo eleitos com o intuito de representar os interesses da população a nível legislativo e assim contribuir para o engradecimento do Estado. Para isso, cada deputado tem uma cota mensal para cobrir as despesas referentes ao exercício parlamentar, como: Passagens, telefonia, contratação de pessoal, divulgação da atividade parlamentar, entre outros.  
-
-O valor da cota parlamentar é diferente para cada estado da União, porque leva em consideração o custo referente a passagens aéreas para os diferentes estados. Para o estado da Paraiba temos a seguinte cota: 
+O valor da cota parlamentar é diferente para cada estado da União, porque leva em consideração o custo referente a passagens aéreas para os diferentes estados da federaça ao o. Para o estado da Paraiba temos a seguinte cota: 
 
       UF       |   VALOR DA COTA R$
 -------------- | --------------------
-      PB       |      42.032,56
+      PB       |      42.032,56      
+-------------- | --------------------       
+
+Logo,
+
+```{r}
+    valorDaCota = 42032.56
+```
 
 
 Diante de uma das maiores crises da política brasileira, aonde deputados são acusados constantemente de corrupção, analisar como gastam o dinheiro da União é uma atividade fundamental de cidadania. 
@@ -43,15 +45,16 @@ Para respondê-las este artigo foi dividido em algumas seções:
 * Os Dados
 * Processamento dos Dados
 * Resultados
+* Conclusao
 * Referências 
 
 ##  Os Dados 
 
 Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no link <https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz>. O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluindo quando e onde ocorreu os gastos, o valor do documento e nome do deputado.
 
-## Processamento dos Dados
+# Processamento dos Dados
 
-Após clonar o repositório e extrair o banco de dados o mesmo foi lido e setado a uma variável 
+Após clonar o repositório e extrair o banco de dados o mesmo foi lido e setado a uma variável gastosDeputadosBr.
 
 A data da análise é mostrada a seguir: 
 ```{r}
@@ -60,11 +63,10 @@ A data da análise é mostrada a seguir:
 ```
 
 
-###### Leitura dos arquivos
+Leitura dos Arquivos:
 ```{r}
-gastosDeputadosBr = read.csv("D:\\Users\\PET Computacao\\Documents\\sampaio\\DataAnalysisI\\gastosDeputados\\ano-atual.csv",
-                             comment.char = "#",
-                             encoding = "UTF-8")
+gastosDeputadosBr = read.csv("~/Documentos/sampaio/AnaliseDeDados/DataAnalysisI/ano-atual.csv",
+                             comment.char = "#", encoding = "UTF-8")
 ```
 
 A estrutura de entrada é visualizada
@@ -74,13 +76,12 @@ A estrutura de entrada é visualizada
 ```
 
 As variáveis consideradas na análise foram:
+
 * txNomeParlamentar
 * sgPartido
 * sgUF
 * vlrLiquido (O seu conteúdo é valor que será realmente descontado ou acrescentado à cota)
 * txtDescricao (O seu conteúdo é a descrição do Tipo de Despesa relativo à despesa em questão.))
-
-As dez primeiras linhas dessas variáveis são mostradas a seguir: 
 
 ```{r}
     #Seleciona as variáveis que serão utilizadas
@@ -90,34 +91,171 @@ As dez primeiras linhas dessas variáveis são mostradas a seguir:
     gastosDeputadosPB = gastosDeputadosPB %>% filter(sgUF == "PB")
 ```
 
-Para facilitar a análise o nome das variáveis foram renomeadas para melhor analisá-las
+Para facilitar a análise o nome das variáveis foram renomeadas para melhor analisá-las e em seguida é impresso as primeiras cinco linhas do dataframe.
 
 ```{r}
     names(gastosDeputadosPB) <- c("UF", "Partido", "Nome", "ValorGasto", "Descricao", "Mes")
     #Imprime as dez primeiras linhas  
-    head(gastosDeputadosPB,10)
+    head(gastosDeputadosPB,5)
 ```
 
-### Como varia os gastos dos deputados? 
+## Como varia os gastos dos deputados? 
 
-Os valores dos gastos dos parlamentares paraibanos variam entre R$ -2.820,00 e R$ 41.890,00. 
+Para isto é gerado um gráfico para melhor visualizar a variação dos gastos dos parlamentares. 
 
-O valor negativo significa que a despesa é um bilhete de compensação de viagem área, significando que o referido valor compensa um outro bilhete emitido e não utilizado pelo deputado. Já o outro extremo, onde a despesa é de mais de 41 mil reais, refere-se ao gasto do _Deputado Benjamin Maranhão_ com divulgação parlamentar no mês de Maio.   
+```{r}
+      ggplot(gastosDeputadosPB, mapping = aes(x = ValorGasto)) + 
+        geom_histogram(bins = 50) + xlab("Valor Gasto em Reais")
+```
 
-Como os valores variam grotescamente, é plotado um gráfico monolog para ajudar na visualização. 
+```{r}
+    ggplot(gastosDeputadosPB) + 
+      geom_density(kernel = "gaussian", mapping = aes(x = ValorGasto/1e3)) + xlab("Valor Gasto em Reais")
+```
+
+Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores crescem exponencialmente. Para facilitar a visualização é plotado um gráfico monolog. É importante frisar que ao plotar um gráfico monolog os valores negativos, referentes a compensação de débitos não serão mostrados. 
 
 ```{r}
   summary(gastosDeputadosPB$ValorGasto)
-
+  DesvioPadrao <- summarise(gastosDeputadosPB, sd(ValorGasto))
+  DesvioPadrao
+  
   ggplot(gastosDeputadosPB, mapping = aes(x = ValorGasto)) + 
-    geom_histogram(bins = 100) + 
-    geom_rug(alpha = .3) +
+    geom_histogram(bins = 50) + 
     scale_x_log10()
 ```
 
-Para avaliar a dispersão dos valores gastos nas cotas
+Os valores são mais concentrados em R$190,00 e 75% dos gastos são inferiores há R$650,00. Contudo, o desvio padrão apresenta um valor de R$2184,16 evidenciando que os valores são muito dispersos. 
 
-Inicialmente, é interessante visualizar qual deputado gasta mais sua cota parlamentar 
+O valor negativo significa que a despesa é um bilhete de compensação de viagem área, significando que o referido valor compensa um outro bilhete emitido e não utilizado pelo deputado. Já o outro extremo, onde a despesa é de mais de 41 mil reais, refere-se ao gasto do _Deputado Benjamin Maranhão_ com divulgação parlamentar no mês de Maio.
 
-groupedby = group_by(gastosDeputadosPB, Nome)
-> summarise(groupedby, sum(ValorGasto))
+O deputado Benjamin Maranhão gastou quase toda sua cota do mês de maio com divulgação parlamentar, tal fato levanta a seguinte questão: Será que os deputados estão gastando mais do que deviam? 
+
+Para isto precisamos recorrer à legislação da Câmera Federal, precisamente no **Artigo 13 do ATO DA MESA de número 23**, promulgada no dia 23 de Maio de 2009, que diz: 
+
+Art. 13. O saldo da Cota não utilizado acumula-se ao longo do exercício financeiro, vedada a acumulação de saldo de um exercício para o seguinte. 
+
+Parágrafo 1º - A Cota somente poderá ser utilizada para despesas de competência do respectivo exercício financeiro. 
+
+Parágrafo 2º - A importância que exceder, no exercício financeiro, o saldo de Cota disponível será deduzida automática e integralmente da remuneração do parlamentar ou do saldo de acerto de contas de que ele seja credor, revertendo-se à conta orçamentária própria da Câmara dos Deputados. 
+
+Diante disto, para responder a dúvida acima, foi calculado o valor total gasto - até o mês de junho - e verificado se algum deputado excedeu a cota total (Cota * Quantidade de meses passado)
+
+```{r}
+    totalGastoDeputado = gastosDeputadosPB %>% group_by(Nome) %>% summarise(totalGasto2016 = sum(ValorGasto))
+```
+
+
+```{r}   
+    ggplot(totalGastoDeputado, mapping = aes(x = Nome, 
+                             y = totalGasto2016/1e3, 
+                             fill = Nome, width = .4)) + 
+  geom_bar(stat = "identity") + 
+  theme(legend.position="none")+
+  coord_flip()
+```
+
+Assim, nenhum deputado excedeu o total da Cota Parlamentar para os seis primeiros meses do ano. 
+
+
+# Respostas da Questões  
+
+## Em que tipo de despesas nossos parlamentares gastam mais recursos de sua cota?
+
+Para responder tal questão, foi preciso plotar o gráfico onde a Descrição dos Gastos e seus respectivos valores estejam contidos. 
+
+```{r}   
+    ggplot(gastosDeputadosPB, mapping = aes(x = Descricao, 
+                             y = ValorGasto/1e3, 
+                             fill = Descricao, width = .4)) + 
+  geom_bar(stat = "identity") + 
+  theme(legend.position="none")+
+  xlab("Tipos de Despesas") + ylab("Valor (em mil) em reais") + ggtitle("Gastos com Despesas dos Deputados") + 
+  coord_flip()
+```
+
+No gráfico acima é possível perceber que os maiores gastos da Cota Parlamentar são para divulgação parlamentar e passagens aéreas. Assim, analisei cada uma dessas despesas. 
+
+Separei os dois grupos que serão analisados: 1) os gastos com divulgação parlamentar; e; 2) os gastos com despesas aéreas. 
+
+```{r}
+      despesaDivulgacao = gastosDeputadosPB %>% filter(Descricao == "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.")
+      despesaAerea = gastosDeputadosPB %>% filter(Descricao == "Emissão Bilhete Aéreo")
+```
+
+Imprimindo o gráfico referente as Despesas com Divulgação Parlamentar, temos: 
+
+```{r}
+    ggplot(despesaDivulgacao, mapping = aes(x = Nome, y = ValorGasto/1e3, fill = Descricao, width = 0.4, aplha = 0.4 )) +
+      theme(legend.position = "none") +
+      xlab("Deputados") + ylab("Valor dos Gastos (em mil reais)") +
+      geom_bar(stat = "identity") + ggtitle("Despesas com Divulgação Parlamentar por Deputado") +
+      coord_flip()
+```
+
+O Deputado que mais gastou da sua cota com divulgação parlamentar foi o _Deputado Veneziano Vital do Rêgo (PMDB)_ com a quantia total de R$ 136.300,00. 
+
+```{r}
+  despesaDivulgacao %>% filter(Nome == "VENEZIANO VITAL DO RÊGO") %>% summarise(despesaComDilvulgacao = sum(ValorGasto))
+```
+
+Em contra partida, o _Deputado Luiz Couto (PT)_ foi o que menos dedicou dos seus recursos para divulgação parlamentar. Todo o seu gasto foi de R$ 11.500,00
+
+```{r}
+  despesaDivulgacao %>% filter(Nome == "LUIZ COUTO") %>% summarise(despesaComDilvulgacao = sum(ValorGasto))
+```
+
+Para as despesas áreas, temos: 
+
+```{r}
+    ggplot(despesaAerea, mapping = aes(x = Nome, y = ValorGasto/1e3, fill = Descricao, width = 0.4, aplha = 0.4 )) +
+      theme(legend.position = "none") +
+      xlab("Deputados") + ylab("Valor dos Gastos (em mil reais)") +
+      geom_bar(stat = "identity") + ggtitle("Despesas com Passagens Aéreas") +
+      coord_flip()
+```
+
+O deputado que mais gastou com despesas aéreas foi o _Deputado Damião Feliciano (PDT)_ com um valor total de R$ 38.558,75. Já o que poupou mais o bolso do brasileiro foi o _Deputado Marcondes Gadelha (PSC)_ com um gasto total de  R$ 6.824,09.
+theme: readable
+        toc: true
+        toc_float: true
+        fig_width: 5
+        fig_height: 4
+```{r}
+    despesaAerea %>% filter(Nome == "DAMIÃO FELICIANO") %>% summarise(despesaComPassagens = sum(ValorGasto))
+```
+
+```{r}
+    despesaAerea %>% filter(Nome == "MARCONDES GADELHA") %>% summarise(despesaComPassagens = sum(ValorGasto))
+```
+
+
+
+##  Quais tipos de despesas têm despesas que mais variam, que têm valores mais desiguais?
+       
+
+```{r}
+    ggplot(gastosDeputadosPB, mapping = aes(x = Descricao, y = ValorGasto/1e3, fill = Descricao, width = 0.2, aplha = 0.1 )) +
+      theme(legend.position = "none") +
+      xlab("Tipos de Despesas") + ylab("Valor dos Gastos (em mil reais)") +
+      geom_boxplot() +
+      coord_flip()
+```
+
+
+
+```{r}
+  ggplot (gastosDeputadosPB, mapping = aes(y = ValorGasto, 
+                                          x = (Descricao), 
+                                         width = .4, fill = Descricao)) +
+        geom_boxplot() + 
+        geom_point() +
+        theme(legend.position="none") +  # Não precisamos da legenda da cor 
+        ylab("Valor das iniciativas") + xlab("Despesas Parlamentares")
+        
+```
+
+
+## Referências 
+
+[ATO DA MESA, Numero 43] (http://www2.camara.leg.br/legin/int/atomes/2009/atodamesa-43-21-maio-2009-588364-publicacaooriginal-112820-cd-mesa.html)
