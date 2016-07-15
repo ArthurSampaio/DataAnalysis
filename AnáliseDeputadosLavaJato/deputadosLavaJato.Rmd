@@ -1,0 +1,27 @@
+---
+title: "Gastos dos Deputados Nordestinos investigados na Lava-Jato"
+author: "Arthur Sampaio"
+date: "15 de julho de 2016"
+output: html_document
+---
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+# Resumo
+
+Neste relatório analisei informações referentes aos gastos dos Deputados Nordestinos envolvidos na Operação Lava-Jato, durante o corrente ano de 2016. Todos os dados utilizados estão disponíveis na [Transparência da Câmara Federal](http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar).A análise, feita na linguagem de programação R, tem o objetivo de investigar como os 13 Deputados Federais Paraibanos gastam suas cotas Parlamentares. Toda a análise presente neste artigo, foi feita em Linguagem R com o auxilio do RMarkdown para auxiliar nesta investigação. 
+
+# Introdução 
+
+Nas mídias muito se fala da Operação Lava-Jato, a maior investigação sobre corrupção conduzida até hoje em solo Brasileiro. Ela começou investigando uma rede de doleiros que atuavam em vários setores e Estados e descobriu um vasto esquema de corrupção na maior estatal do país - A Petrobrás, envolvendo desde políticos e as maiores empreiteras do Brasil. 
+
+Cerca de 22 Deputados Federais são acusados de pertecerem ao maior esquema de corrupção que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo do Estado Brasileiro. 
+
+Diante das circunstância acima e como um bom nordestino, neste artigo eu investiguei e analisei informações referentes aos gastos dos Deputados Nordestinos envolvidos na investigação da Lava-Jato durante os seis primeiros meses deste ano, 2016.  
+
+
+
