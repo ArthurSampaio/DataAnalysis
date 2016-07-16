@@ -2,7 +2,13 @@
 title: "Gastos dos Deputados Nordestinos investigados na Lava-Jato"
 author: "Arthur Sampaio"
 date: "15 de julho de 2016"
-output: html_document
+output: 
+      html_document:
+      theme: yeti
+      toc: true
+      toc_float: true
+      fig_width: 5
+      fig_height: 4
 ---
 
 ```{r}
@@ -13,15 +19,125 @@ theme_set(theme_bw())
 
 # Resumo
 
-Neste relatório analisei informações referentes aos gastos dos Deputados Nordestinos envolvidos na Operação Lava-Jato, durante o corrente ano de 2016. Todos os dados utilizados estão disponíveis na [Transparência da Câmara Federal](http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar).A análise, feita na linguagem de programação R, tem o objetivo de investigar como os 13 Deputados Federais Paraibanos gastam suas cotas Parlamentares. Toda a análise presente neste artigo, foi feita em Linguagem R com o auxilio do RMarkdown para auxiliar nesta investigação. 
+Neste relatório analisei informações referentes aos gastos dos Deputados Nordestinos envolvidos na Operação Lava-Jato, durante o corrente ano de 2016. Todos os dados utilizados estão disponíveis na [Transparência da Câmara Federal](http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar).A análise tem o objetivo de investigar como os 13 Deputados Federais Paraibanos gastam suas cotas Parlamentares. Toda a análise presente neste relatório, foi feita em Linguagem R com o auxilio do RMarkdown para gerar este documento. 
 
 # Introdução 
 
-Nas mídias muito se fala da Operação Lava-Jato, a maior investigação sobre corrupção conduzida até hoje em solo Brasileiro. Ela começou investigando uma rede de doleiros que atuavam em vários setores e Estados e descobriu um vasto esquema de corrupção na maior estatal do país - A Petrobrás, envolvendo desde políticos e as maiores empreiteras do Brasil. 
+Nas mídias muito se fala da Operação Lava-Jato, a maior investigação sobre corrupção conduzida até hoje em solo Brasileiro. Ela começou investigando uma rede de doleiros que atuavam em vários setores e Estados e descobriu um vasto esquema de corrupção na maior estatal do país - A Petrobrás, envolvendo desde políticos às maiores empreiteras do Brasil. Para enteder mais sobre a Operação Lava Jato o Ministério Público Federal - [MPF](http://lavajato.mpf.mp.br/entenda-o-caso) criou um portal que explica detalhadamente. 
 
-Cerca de 22 Deputados Federais são acusados de pertecerem ao maior esquema de corrupção que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo do Estado Brasileiro. 
+Cerca de 22 Deputados Federais, eleitos para representarem o pove, são acusados de pertecerem ao maior esquema de corrupção brasileira que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo do Estado Brasileiro. Seis desses vinte e dois deputados acusados são nordestinos o que me deixa com um senso de dever mais agunçado para saber como estes seis gastam os nossos recursos, de acordo com [o Globo](http://infograficos.oglobo.globo.com/brasil/politicos-lava-jato.html), sao eles: 
 
-Diante das circunstância acima e como um bom nordestino, neste artigo eu investiguei e analisei informações referentes aos gastos dos Deputados Nordestinos envolvidos na investigação da Lava-Jato durante os seis primeiros meses deste ano, 2016.  
+* Anibal Gomes, PMDB/CE
+* Aguinaldo Ribeiro, PP/PB
+* Arthur Lira, PP/AL
+* Eduardo da Fonte, PP/PE
+* Waldir Maranhao, PP/MA
+* Roberto Britto, PP/BA
+
+Diante disto, este relatório tem o objetivo de responder duas perguntas chaves para saciar minha curiosidade: 
+
+1. Em que tipo de gastos os parlamentares investigados mais gastam os seus recursos?
+2. Quais os fornecedores que mais arrecadam com os gastos destes deputados? 
+
+Para responder estas questões, este relatório foi dividido em algumas seções para facilitar a análise:
+
+* Compreendendo os Dados;
+* Resposta para as questoes; 
+* Algumas palavras;
+* Referencia; 
+
+# Compreendendo os Dados
+
+Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no link <https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz>. O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluindo quando e onde ocorreu os gastos, o valor do documento e nome do deputado.
+
+Após clonar o repositório e extrair o banco de dados o mesmo foi lido e setado a uma variável gastosDeputadosBr.
+
+```{r}
+  gastosDeputadosBr <- read.csv("~/Documentos/sampaio/AnaliseDeDados/DataAnalysis/ano-atual.csv")
+```
+
+```{r}
+  deputadosInvestigados <- c("ANÍBAL GOMES", "AGUINALDO RIBEIRO", "ARTHUR LIRA", "EDUARDO DA FONTE", "WALDIR MARANHÃO", "ROBERTO BRITTO") 
+
+  gastosInvestigados <- gastosDeputadosBr %>% filter(txNomeParlamentar %in% deputadosInvestigados)
+```
+
+Para facilitar a análise, selecionei algumas colunas (variáveis) para trabalhar e obter a respostas das minhas perguntas, são elas: 
+
+* txNomeParlamentar
+* sgPartido
+* sgUF
+* vlrLiquido (O seu conteúdo é valor que será realmente descontado ou acrescentado à cota)
+* txtDescricao (O seu conteúdo é a descrição do Tipo de Despesa relativo à despesa em questão.))
+* txtFornecedor (O seu conteúdo é o nome do fornecedor do serviço e/ou produto)
+* txtCNPJCPF (O seu conteúdo é o número do CNPJ ou CPF do Fornecedor)
+* numMes (O mês do gasto)
+
+Renomeando as variáveis, nós temos: 
+
+```{r}
+   #Seleciona as variáveis que serão utilizadas
+    gastosDeputadosInvestigados <- select(gastosInvestigados, sgPartido , txNomeParlamentar, vlrLiquido, txtDescricao, numMes, sgUF, txtFornecedor, txtCNPJCPF)
+```
+
+Em seguida, renomeio as variáveis para facilitar a compreensão na leitura.
+
+```{r}
+  names(gastosDeputadosInvestigados) <- c("Partido", "Nome", "Valor", "Descricao", "Mes", "UF", "Fornecedor", "CNPJCPF")
+```
+
+Após investigar manualmente o dataframe, percebi que o _Deputado Aníbal Gomes_ ainda não colocou na transparência os gastos dos meses de Maio e Junto, ou seja, o mesmo comprovou desespesas até o mês de Abril. Em decorrência disto, irei analisar os gastos dos deputado apenas durante o período entre Janeiro e Abril do corrente ano, 2016.
+
+```{r}
+  gastosDeputadosInvestigados <- filter(gastosDeputadosInvestigados, Mes <= 4)
+
+```
+
+
+Antes que qualquer resposta possa respondida, em toda análise é necessário como os dados se comportam, para isto, plotei dois gráficos para visualizar como os dados se comportam. 
+
+Primeiro, o histograma, para determinar onde está mais concentrados os valores. 
+
+```{r}
+   ggplot(gastosDeputadosInvestigados, mapping = aes(x = Valor)) + 
+        geom_histogram(bins = 50) + xlab("Valor Gasto em Reais") + ylab("Qtd de gastos")
+```
+
+
+```{r}
+    ggplot(gastosDeputadosInvestigados) + 
+      geom_density(kernel = "gaussian", mapping = aes(x = Valor)) + xlab("Valor Gasto em Reais")
+```
+
+Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores crescem exponencialmente. Para facilitar a visualização é plotado um gráfico monolog. É importante frisar que ao plotar um gráfico monolog os valores negativos, referentes a compensação de débitos não serão mostrados. 
+
+```{r, message=FALSE, warning=FALSE}
+  summary(gastosDeputadosInvestigados$Valor)
+  DesvioPadrao <- summarise(gastosDeputadosInvestigados, sd(Valor))
+  DesvioPadrao
+  
+  ggplot(gastosDeputadosInvestigados, mapping = aes(x = Valor)) + 
+    geom_histogram(bins = 50) + 
+    scale_x_log10()
+```
+
+Os valore estão concentrados entre R$ 50 e R$ 1000, contudo, a maior concetração de valores é entorno da mediana (R$ 556,20). Além disto, 75% dos gastos são inferiores a R$ 565,90. Os valores variam de R$ -1901 referente compensação de bilhete aéreo e o maior valor gasto é de R$ 39600 do _Deputado Roberto Britto_ referente a divulgação com atividade parlamentar. 
+
+Para concluir a compreensão dos dados, é importante saber o quanto os deputados tem gastados nos meses do ano. 
+
+```{r}
+    totalGastoDeputado = gastosDeputadosInvestigados %>% group_by(Nome) %>% summarise(totalGasto2016 = sum(Valor))
+```
+
+```{r}   
+    ggplot(totalGastoDeputado, mapping = aes(x = Nome, 
+                             y = totalGasto2016/1e3, 
+                             fill = Nome, width = .4)) + 
+  geom_bar(stat = "identity") + 
+  theme(legend.position="none")+
+  coord_flip()
+```
+
 
 
 
