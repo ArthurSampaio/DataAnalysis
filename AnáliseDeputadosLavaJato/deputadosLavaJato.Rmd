@@ -3,12 +3,9 @@ title: "Gastos dos Deputados Nordestinos investigados na Lava-Jato"
 author: "Arthur Sampaio"
 date: "15 de julho de 2016"
 output: 
-      html_document:
-      theme: yeti
-      toc: true
-      toc_float: true
-      fig_width: 5
-      fig_height: 4
+    html_document:
+    theme: readable
+      
 ---
 
 ```{r}
@@ -34,7 +31,7 @@ Cerca de 22 Deputados Federais, eleitos para representarem o pove, são acusados
 * Waldir Maranhao, PP/MA
 * Roberto Britto, PP/BA
 
-Diante disto, este relatório tem o objetivo de responder duas perguntas chaves para saciar minha curiosidade: 
+Diante disto, este relatório tem o objetivo de responder duas pehttp://www.receita.fazenda.gov.br/http://www.receita.fazenda.gov.br/rguntas chaves para saciar minha curiosidade: 
 
 1. Qual o comportamento das despesas que os deputados investigados mais investem recursos?
 2. Das despesas investigadas na questão anterior, quais os fornecedores que mais arrecadam dinheiro com estes deputados? 
@@ -65,7 +62,7 @@ Após clonar o repositório e extrair o banco de dados o mesmo foi lido e setado
 Para facilitar a análise, selecionei algumas colunas (variáveis) para trabalhar e obter a respostas das minhas perguntas, são elas: 
 
 * txNomeParlamentar
-* sgPartido
+* sgPartidohttp://www.receita.fazenda.gov.br/
 * sgUF
 * vlrLiquido (O seu conteúdo é valor que será realmente descontado ou acrescentado à cota)
 * txtDescricao (O seu conteúdo é a descrição do Tipo de Despesa relativo à despesa em questão.))
@@ -154,7 +151,7 @@ Nesta seção irei responder as questões com as quais me comprometi em responde
 
 Para responder tal questão, foi preciso plotar o gráfico onde a Descrição dos Gastos e seus respectivos valores estejam contidos. 
 
-```{r message=FALSE, warning=FALSE}
+```{r }
     ggplot(gastosDeputadosInvestigados, mapping = aes(x = Descricao, 
                              y = Valor/1e3, 
                              fill = Descricao, width = .4)) + 
@@ -271,7 +268,7 @@ Seguindo, o mesmo pensamento dos dois tópicos acima:
   summarise(bilhete, sum(Valor))
 ```
 
-Entre os meses analisados foram gastados R$ 175582 com passagens aéreas. Pelo fator da compensação de bilhetes aéreos o valor mínimo é de R$ -2028. Em decorrência disto, o valor do desvio padrão é de R$ 700.  
+Entre os meses analisados foram gastados R$ 175582 com passagens aéreas. Pelo fator da compensação de bilhetes aéreos o valor mínimo é de R$ -2028. Em decorrência disto, o valor do desvio padrão é de R$ 700http://www.receita.fazenda.gov.br/.  
 
 ```{r}
     ggplot(bilhete, mapping = aes(x = Descricao, y = Valor/1e3)) +
@@ -283,7 +280,43 @@ Como mostrado acima, a concentração dos valores dos bilhetes estão entorno da
 
 ## Das despesas investigadas na questão anterior, quais os fornecedores que mais arrecadam dinheiro com estes deputados? 
 
+Para responder tal questão precisamos agrupar em um data-frame todos os fornecedores e o total de arrecadação que cada um conseguiu com as despesas dos deputados. 
 
+```{r}
+  fornecedoresInvestigados = gastosInvestigados %>% group_by(Fornecedor) %>%  
+                      summarise(valorArrecadadoTotal = sum(Valor))
+```
+
+Em seguida, é plotado um gráfico de barras
+
+```{r}
+  ggplot(fornecedoresInvestigados, mapping = aes(x = Fornecedor, y = valorArrecadadoTotal/1e3, fill = Fornecedor)) +
+      geom_bar(stat = "identity") + coord_flip() + theme(legend.position="none") + 
+      xlab("Fornecedores") + ylab("Valor Arrecadado (em mil reais)")
+```
+
+Como esperado, os fornecedores que mais arrecadaram foram as companhias de aviação comercial, como a TAM e a GOL. 
+
+A empresa de Marketing, Máxima Três Comunicação LTDA-ME, arrecadou no período analisado R$ 51000, referentes a material publicitários feitas para o _Deputado Aguinaldo Ribeiro_. O [sócio majoritário](http://www.receita.fazenda.gov.br/pessoajuridica/cnpj/cnpjreva/cnpjreva_solicitacao.asp) da empresa Máxima Três Comunicação, __Maximiliano Leal Marques Neves__ é envolvido em um [processo](http://www.polemicaparaiba.com.br/polemicas/ruy-dantas-fabiano-gomes-e-mais-cinco-empresarios-de-comunicacao-estao-envolvidos-em-processo-com-estela-bezerra/) , do ano de 2012, junto com a então Secretária de Comunicação do Estado da Paraíba, _Estela Bezerra (PSB)_ , e outros seis empresários do ramo de marketing. O valor do processo é de 45 milhões de reais.  
+
+Já a fornecedora _Josely Fernanda do Nascimento_, que trabalha com produção de vídeos e programas televisivos, arrecadou até Abril o valor de R$22500. A mesma já tem um histórico de contratos com deputados federais como pode ser visto na platafoma de [de Olho Nele](http://olhoneles.org/detail-supplier/20126#!houses).
+
+# Algumas Palavras
+
+O relatório está chegando ao fim, após analisar os dados, vimos que os maiores gastos dos deputados investigados são com Divulgação Parlamentar, Emissão de Bilhetes Aéreos e Alugueis de automoveis. Além disto, foi possível perceber que diferentes fornecedores atendem as necessidades dos mais variados deputados federais, como o caso da _Josely Fernanda_ e _Jean Vilar dos Santos ME_ - alugueis de carros em Brasília.
+
+Além disto, foi possível perceber que um deputado - Aguinaldo Ribeiro - mantém relação comercial com um investigado de um processo de mais de 40 milhões de reais, o que levanta a pergunta: Há uma relação entre o Deputado e a respectiva empresa extra-negócios? Essa pergunta eu deixo para as próxima análises. 
+
+
+# Referências 
+
+[De Olho Neles](http://olhoneles.org/)
+
+[Câmara Federal](http://www.camara.gov.br/)
+
+[Receita Federal](http://www.receita.fazenda.gov.br/)
+
+[R for Data Science](http://r4ds.had.co.nz/introduction.html#prerequisites)
 
 
 
