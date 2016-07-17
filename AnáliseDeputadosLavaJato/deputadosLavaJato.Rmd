@@ -36,19 +36,19 @@ Cerca de 22 Deputados Federais, eleitos para representarem o pove, são acusados
 
 Diante disto, este relatório tem o objetivo de responder duas perguntas chaves para saciar minha curiosidade: 
 
-1. Em que tipo de gastos os parlamentares investigados mais gastam os seus recursos?
-2. Quais os fornecedores que mais arrecadam com os gastos destes deputados? 
+1. Qual o comportamento das despesas que os deputados investigados mais investem recursos?
+2. Das despesas investigadas na questão anterior, quais os fornecedores que mais arrecadam dinheiro com estes deputados? 
 
 Para responder estas questões, este relatório foi dividido em algumas seções para facilitar a análise:
 
 * Compreendendo os Dados;
-* Resposta para as questoes; 
+* As questões; 
 * Algumas palavras;
-* Referencia; 
+* Referência; 
 
 # Compreendendo os Dados
 
-Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no link <https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz>. O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluindo quando e onde ocorreu os gastos, o valor do documento e nome do deputado.
+Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no link <https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz>. O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluin- ggplot(diamonds, aes(cut, color))do quando e onde ocorreu os gastos, o valor do documento e nome do deputado.
 
 Após clonar o repositório e extrair o banco de dados o mesmo foi lido e setado a uma variável gastosDeputadosBr.
 
@@ -86,7 +86,7 @@ Em seguida, renomeio as variáveis para facilitar a compreensão na leitura.
   names(gastosDeputadosInvestigados) <- c("Partido", "Nome", "Valor", "Descricao", "Mes", "UF", "Fornecedor", "CNPJCPF")
 ```
 
-Após investigar manualmente o dataframe, percebi que o _Deputado Aníbal Gomes_ ainda não colocou na transparência os gastos dos meses de Maio e Junto, ou seja, o mesmo comprovou desespesas até o mês de Abril. Em decorrência disto, irei analisar os gastos dos deputado apenas durante o período entre Janeiro e Abril do corrente ano, 2016.
+Após investigar manualmente o dataframe, percebi que o _Deputado Aníbal Gomes_ ainda não colocou na transparência os gastos dos meses de Maio e Junto, ou seja, o mesmo comprovou desespesas até o mês de Abril. Em decorrência disto, para não arriscar a veracidade dos fatos, irei analisar os gastos dos deputado apenas durante o período entre Janeiro e Abril do corrente ano, 2016.
 
 ```{r}
   gastosDeputadosInvestigados <- filter(gastosDeputadosInvestigados, Mes <= 4)
@@ -94,22 +94,15 @@ Após investigar manualmente o dataframe, percebi que o _Deputado Aníbal Gomes_
 ```
 
 
-Antes que qualquer resposta possa respondida, em toda análise é necessário como os dados se comportam, para isto, plotei dois gráficos para visualizar como os dados se comportam. 
-
-Primeiro, o histograma, para determinar onde está mais concentrados os valores. 
+Antes que qualquer resposta possa respondida, em toda análise é necessário saber como os dados se comportam, para isto, plotei um histograma para visualizar como os dados se comportam. 
 
 ```{r}
    ggplot(gastosDeputadosInvestigados, mapping = aes(x = Valor)) + 
         geom_histogram(bins = 50) + xlab("Valor Gasto em Reais") + ylab("Qtd de gastos")
 ```
 
-
-```{r}
-    ggplot(gastosDeputadosInvestigados) + 
-      geom_density(kernel = "gaussian", mapping = aes(x = Valor)) + xlab("Valor Gasto em Reais")
-```
-
 Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores crescem exponencialmente. Para facilitar a visualização é plotado um gráfico monolog. É importante frisar que ao plotar um gráfico monolog os valores negativos, referentes a compensação de débitos não serão mostrados. 
+
 
 ```{r, message=FALSE, warning=FALSE}
   summary(gastosDeputadosInvestigados$Valor)
@@ -121,22 +114,196 @@ Os valores estão muito concentrados a esquerda do gráfico, assimétricos , al�
     scale_x_log10()
 ```
 
-Os valore estão concentrados entre R$ 50 e R$ 1000, contudo, a maior concetração de valores é entorno da mediana (R$ 556,20). Além disto, 75% dos gastos são inferiores a R$ 565,90. Os valores variam de R$ -1901 referente compensação de bilhete aéreo e o maior valor gasto é de R$ 39600 do _Deputado Roberto Britto_ referente a divulgação com atividade parlamentar. 
+Os valores estão concentrados entre R$ 50 e R$ 1000, como mostra o gráfico abaixo. Contudo, a maior concetração de valores é entorno da mediana (R$ 556,20). Além disto, 75% dos gastos são inferiores a R$ 565,90. Os valores variam de R$ -1901 referente compensação de bilhete aéreo e o maior valor gasto é de R$ 39600 do _Deputado Roberto Britto_ referente a divulgação com atividade parlamentar. 
 
-Para concluir a compreensão dos dados, é importante saber o quanto os deputados tem gastados nos meses do ano. 
+```{r, message=FALSE, warning=FALSE}
+ggplot(gastosDeputadosInvestigados, mapping = aes(x = Nome, 
+                             y = Valor, color = Nome)) + scale_y_log10() +
+  geom_boxplot() + 
+  geom_point(position = position_jitter(width = .3), 
+             alpha = .2) +
+  theme(legend.position="none") +
+  coord_flip()
+```
+
+Para concluir a compreensão dos dados, é importante saber o quanto os deputados tem gastados nos meses analisados. 
 
 ```{r}
     totalGastoDeputado = gastosDeputadosInvestigados %>% group_by(Nome) %>% summarise(totalGasto2016 = sum(Valor))
 ```
 
+
 ```{r}   
-    ggplot(totalGastoDeputado, mapping = aes(x = Nome, 
+    ggplot(totalGastoDeputado, mapping = aes(x = c(1,2,3,4,5,6), 
                              y = totalGasto2016/1e3, 
                              fill = Nome, width = .4)) + 
   geom_bar(stat = "identity") + 
+  ylab("Gastos (em mil reais)") + xlab("Deputados")
+ 
+```
+
+É possível notar que o _Deputado Aguinaldo Ribeiro_ em Abril já havia gasto mais de R$ 170.000. 
+
+Após a análise inicial dos dados, vamos à resolução das questões. 
+
+# As questões
+
+Nesta seção irei responder as questões com as quais me comprometi em responder no começo deste relatório. 
+
+## Qual o comportamento das despesas que os deputados investigados mais investem recursos? ? 
+
+Para responder tal questão, foi preciso plotar o gráfico onde a Descrição dos Gastos e seus respectivos valores estejam contidos. 
+
+```{r message=FALSE, warning=FALSE}
+    ggplot(gastosDeputadosInvestigados, mapping = aes(x = Descricao, 
+                             y = Valor/1e3, 
+                             fill = Descricao, width = .4)) + 
+  
+  geom_bar(stat = "identity") + 
   theme(legend.position="none")+
+  xlab("Tipos de Despesas") + ylab("Valor (em mil) em reais") + 
   coord_flip()
 ```
+
+Como esperado, os maiores gastos são para as despesas de Emissão de Bilhete Aéreo, Divulgação Parlamentar e Locação de Veículos. 
+
+Para continuar a análise e investigar como esses três gastos se comportam é necessário reagrupá-las em um novo data-frame. 
+
+```{r}
+    despesasInvestigadas <- c("LOCAÇÃO OU FRETAMENTO DE VEÍCULOS AUTOMOTORES", "Emissão Bilhete Aéreo", "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.")
+
+  gastosInvestigados <- gastosDeputadosInvestigados %>% filter(Descricao %in% despesasInvestigadas)
+```
+
+Para determinar qual deputado mais gasta com cada uma das despesas foi plotado um gráfico de barras laterais por cada despesa. 
+
+```{r}
+  ggplot(gastosInvestigados, mapping = aes(x = Nome,
+  y = Valor/1e3, fill = Descricao, width = .4)) +
+  geom_bar(stat = "identity") +   theme(legend.position="none")+
+  xlab("Tipos de Despesas") + ylab("Valor (em mil) em reais") +
+   facet_grid(Descricao ~.) + coord_flip()
+
+```
+
+Dos seis deputados analisados neste relatório, apenas os deputados Roberto Britto, Eduardo da Fonte e Aguinaldo Ribeiro gastaram com divulgação parlamentar. 
+
+Assim, é possível visualizar que os deputados _Roberto Britto_, _Waldir Maranhão_ e _Aníbal Gomes_ foram os que mais gastaram com, respectivamente, Divulgação Parlamentar, Emissão de Bilhete Aéreo e Locação de Veículos. 
+
+## Analisando cada despesa
+
+Para avaliar a dispersão dos dados plotei um boxplot, que divide os dados em quartis (blocos de 25%).
+
+```{r}
+ggplot(gastosInvestigados, mapping = aes(x = Descricao,
+                             y = Valor/1e3)) + 
+  geom_boxplot() + coord_flip() + xlab("Despesas") + ylab("Gastos (em mil reais)")
+
+```
+
+Pelo gráfico, é possível que a despesa de Divulgação da atividade parlamentar é aquela que tem a maior dispersão de valores, enquanto a Emissão de Bilhetes Aéreos é aquela que apresenta os dados mais concentrados, algo também já esperado, já que a oscilação dos valores das passagens oferecidas pela companhias de aviação comercial é pequena. 
+
+### Analisando a despesa de "Locação de Veículos"
+
+Inicialmente temos de alocar em um mesmo data-frame todos os dados referentes as despesas de Locação de Veículos, assim: 
+
+```{r}
+  locacao = gastosInvestigados %>% filter(Descricao == "LOCAÇÃO OU FRETAMENTO DE VEÍCULOS AUTOMOTORES")
+  summary(locacao$Valor) 
+  summarise(locacao, sd(Valor))
+```
+
+Foi gasto um total de R$ 95740 __apenas__ com a despesa de locação de veiculos. Os valores dos alugueis variam do valor mínimo de R$ 1226 e o máximo de R$ 9900. Tais valores justificam o Desvio Padrão, medida que determina a variação dos dados em relação a sua média, de R$ 2710. 
+
+```{r}
+  valorTotal = summarise(locacao, valorTotal = sum(Valor))
+  ggplot(locacao, mapping = aes(x = Descricao, y = Valor/1e3)) +
+    geom_boxplot() +
+    geom_point(position = position_jitter(width = .4),  alpha = .7) + ylab("Valor (em mil reais)")
+```
+
+Através do boxplot acima, visualizar que 75% dos dados (terceiro quartil) estão abaixo de R$5000.
+
+```{r}
+    maiorValor = locacao %>% filter(Valor == 9900)
+    head(maiorValor,1)
+```
+
+
+É importante destacar que durante os meses de Fevereiro, Março e Abril, o Deputado baiano Roberto Britto gastou quase R$ 10000 por mês com locação de carro, além de R$ 6000 por mês com combustíveis. 
+
+### Analisando a despesa de "Divulgação Parlamentar"
+
+Com o mesmo pensamento da análise acima: 
+
+```{r}
+  divulgacao = gastosInvestigados %>% filter(Descricao == "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.")
+  summary(divulgacao$Valor) 
+  summarise(divulgacao, sd(Valor))
+  summarise(divulgacao, sum(Valor))
+```
+
+Foi gasto um montante de R$ 133100 com divulgação parlamentar nos 4 primeiros meses do ano. Os valores variam entre R$ 5000 e R$ 39600. O desvio padrão dessa despesa é de R$ 10456, o que é justificado pela diferença entre os extremos. 
+
+O maior valor é referente ao, novamente, Deputador Roberto Britto que gastou R$ 39600 com divulgação parlamentar no mês de Abril. No mesmo mês, o deputado gastou R$ 44600 com divulgação parlamentar. 
+
+```{r}
+  maiorValor = divulgacao %>% filter(Valor == 39600)
+  head(maiorValor)
+```
+
+```{r}
+  ggplot(divulgacao, mapping = aes(x = Descricao, y = Valor/1e3)) +
+    geom_boxplot() +
+    geom_point(position = position_jitter(width = .2),  alpha = .7) + ylab("Valor (em mil reais)")
+```
+
+No gráfico em boxplot acima é possível notar que 75% dos valores estão abaixo de R$ 17000. A maior concentração de valores está entorno da mediana, R$ 12100. 
+
+### Analisando a despesa de "Emissão de Bilhete Aéreos"
+
+Seguindo, o mesmo pensamento dos dois tópicos acima: 
+
+```{r}
+  bilhete = gastosInvestigados %>% filter(Descricao == "Emissão Bilhete Aéreo")
+  summary(bilhete$Valor) 
+  summarise(bilhete, sd(Valor))
+  summarise(bilhete, sum(Valor))
+```
+
+Entre os meses analisados foram gastados R$ 175582 com passagens aéreas. Pelo fator da compensação de bilhetes aéreos o valor mínimo é de R$ -2028. Em decorrência disto, o valor do desvio padrão é de R$ 700.  
+
+```{r}
+    ggplot(bilhete, mapping = aes(x = Descricao, y = Valor/1e3)) +
+    geom_boxplot() +
+    geom_point(position = position_jitter(width = .2),  alpha = .7) + ylab("Valor (em mil reais)")
+```
+
+Como mostrado acima, a concentração dos valores dos bilhetes estão entorno da mediana, R$ 271. Além disto, 75% dos valores estão abaixo do valor de R$ 655. 
+
+## Das despesas investigadas na questão anterior, quais os fornecedores que mais arrecadam dinheiro com estes deputados? 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
