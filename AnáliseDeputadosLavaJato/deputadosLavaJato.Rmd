@@ -50,7 +50,7 @@ Os dados disponíveis no site da Transparência da Câmara Federal são em forma
 Após clonar o repositório e extrair o banco de dados o mesmo foi lido e setado a uma variável gastosDeputadosBr.
 
 ```{r}
-  gastosDeputadosBr <- read.csv("~/Documentos/sampaio/AnaliseDeDados/DataAnalysis/ano-atual.csv")
+  gastosDeputadosBr <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/DataAnalysis/GastosParlamentares/gastosDeputados/ano-atual.csv")
 ```
 
 ```{r}
