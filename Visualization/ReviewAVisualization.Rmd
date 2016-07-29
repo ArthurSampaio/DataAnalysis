@@ -1,0 +1,92 @@
+---
+title: "Revisitando uma Visualização"
+author: ""
+date: "27 de julho de 2016"
+output: html_document
+---
+
+```{r}
+library(dplyr, warn.conflicts = FALSE)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+# Resumo
+
+Cerca de 22 Deputados Federais, eleitos para representarem o pove, são acusados de pertecerem ao maior esquema de corrupção brasileira que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo do Estado Brasileiro. Seis desses vinte e dois deputados acusados são nordestinos o que me deixa com um senso de dever mais agunçado para saber como estes seis gastam os nossos recursos, de acordo com [o Globo](http://infograficos.oglobo.globo.com/brasil/politicos-lava-jato.html), sao eles: 
+
+* Anibal Gomes, PMDB/CE
+* Aguinaldo Ribeiro, PP/PB
+* Arthur Lira, PP/AL
+* Eduardo da Fonte, PP/PE
+* Waldir Maranhao, PP/MA
+* Roberto Britto, PP/BA
+
+Assim, neste pequeno relatório será analisado os gastos das despesas referente à locação de automóveis, passagens aéreas e divulgação parlamentar dos Deputados Federais Nordestinos envolvidos no escândalo da Operação Lava-Jato. Todos os dados utilizados estão disponíveis na [Transparência da Câmara Federal](http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar).A análise tem o objetivo de investigar como os Deputados Federais Nordestinos gastam suas cotas Parlamentares. Toda a análise presente neste relatório, foi feita para os meses de Janeiro à Abril, uma vez que o Deputado Anibal Gomes ainda não prestou conta dos gastos de Maio e Junho.
+
+# Análise das despesas 
+
+Nos relatórios anteriores - que podem ser acessados no meu [GitHub](https://github.com/ArthurSampaio/DataAnalysis) - vimos que as despesas que os respectivos deputados mais gastam suas despesas são com Divulgação Parlamentar, Locação e fretamento de veículos, e passagens aéreas. 
+
+A seguir é mostrado o comportamento desses gastos:
+
+
+```{r fig.width=10, message=FALSE, warning=FALSE, include=FALSE}
+  gastosDeputadosBr <- read.csv("~/Documentos/sampaio/AnaliseDeDados/DataAnalysis/GastosParlamentares/gastosDeputados/ano-atual.csv")
+  
+  deputadosInvestigados <- c("ANÍBAL GOMES", "AGUINALDO RIBEIRO", "ARTHUR LIRA", "EDUARDO DA FONTE", "WALDIR MARANHÃO", "ROBERTO BRITTO") 
+
+  gastosInvestigados <- gastosDeputadosBr %>% filter(txNomeParlamentar %in% deputadosInvestigados)
+  
+   #Seleciona as variáveis que serão utilizadas
+  gastosDeputadosInvestigados <- select(gastosInvestigados, sgPartido , txNomeParlamentar, vlrLiquido, txtDescricao, numMes, sgUF, txtFornecedor, txtCNPJCPF)  
+  
+  #Renomeando as variáveis
+  names(gastosDeputadosInvestigados) <- c("Partido", "Nome", "Valor", "Descricao", "Mes", "UF", "Fornecedor", "CNPJCPF")
+  
+  #Filtrando para os meses de Janeiro à Abril
+  gastosDeputadosInvestigados <- filter(gastosDeputadosInvestigados, Mes <= 4)
+  
+  #Selecionando as Despesas Investigadas
+    despesasInvestigadas <- c("LOCAÇÃO OU FRETAMENTO DE VEÍCULOS AUTOMOTORES", "Emissão Bilhete Aéreo", "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR.")
+  gastosInvestigados <- gastosDeputadosInvestigados %>% filter(Descricao %in% despesasInvestigadas)
+
+  #Renomeando os valores das variáveis para facilitar na compreensão dos dados
+   gastosInvestigados$Descricao <- ordered(gastosInvestigados$Descricao, levels = c("LOCAÇÃO OU FRETAMENTO DE VEÍCULOS AUTOMOTORES", "Emissão Bilhete Aéreo", "DIVULGAÇÃO DA ATIVIDADE PARLAMENTAR."), c("LOCAÇÃO DE VEICULOS", "PASSAGENS AEREAS", "DIVULGAÇÃO PARLAMENTAR"))
+   
+   
+```
+
+O gráfico abaixo tem por objetivo visualizar quais deputados gastaram mais com determinadas despesas além de comparar cada deputado entre si. 
+
+```{r fig.width=10, echo=FALSE}
+
+  ggplot(gastosInvestigados, mapping = aes(x = Descricao, 
+                              y = Nome,
+                              col  = UF)) + 
+  geom_point(aes(size = Valor )) + scale_size_area(max_size = 10) + ylab("Deputados Federais") + ggtitle("Gastos por Deputado") + xlab("Tipos de Despesa") + scale_color_manual(values = c("#ff4000", "#00ff00", "#0040ff", "#ff0080" ,"#ffd500","#004f6d" ))
+  
+```
+
+
+
+O gráfico acima tem por objetivo evidenciar os maiores gastos dos deputados nas respectivas desespesas. 
+No eixo x, temos as variáveis categóricas dos tipos de despesas, no eixo y, há o nome dos deputados investigados. As cores são referentes ao Estado no qual o Deputado foi eleito e o tamnho dos pontos são diretamente proporcionais ao gasto naquela despesa. Por exemplo, através do gráfico é possível perceber que o Deputado Roberto Britto foi o que mais gastou com Divulgação Parlamentar. Atráves do mesmo gráfico é possível obter outras análises.
+
+
+#### Para julgamento 
+
+Para a avaliação de vocês, alunos de AD1, este é o gráfico do meu relatório 01. Assim é possível julgar a minha escolha acima. 
+
+```{r fig.width=10, echo=FALSE}
+  ggplot(gastosInvestigados, mapping = aes(x = Nome,
+  y = Valor/1e3, fill = Descricao, width = .4)) +
+  geom_bar(stat = "identity") +   theme(legend.position="none")+
+  xlab("Tipos de Despesas") + ylab("Valor (em mil) em reais") +
+   facet_grid(Descricao ~.) + coord_flip()
+
+```
+
+
+
+
