@@ -25,8 +25,8 @@ shinyServer(function(input, output){
   output$deputie = renderPlot({
    gastosDeputie = gastosDeputadosInvestigados %>%  filter(Nome == input$deputados) %>% group_by(Descricao) %>% summarise(total = sum(Valor)) 
    View(gastosDeputie)
-    ggplot(gastosDeputie, aes(x =  total, y= Descricao)) +
-      geom_bar()
+    ggplot(gastosDeputie, aes(x =  Descricao, y= total)) +
+      geom_bar(stat="identity") + coord_flip()
     
   })
   
