@@ -16,7 +16,7 @@ theme_set(theme_bw())
 
 # Resumo
 
-Neste relatório analisei informações referentes aos gastos dos Deputados Nordestinos envolvidos na Operação Lava-Jato, durante o corrente ano de 2016. Todos os dados utilizados estão disponíveis na [Transparência da Câmara Federal](http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar).A análise tem o objetivo de investigar como os 13 Deputados Federais Paraibanos gastam suas cotas Parlamentares. Toda a análise presente neste relatório, foi feita em Linguagem R com o auxilio do RMarkdown para gerar este documento. 
+Neste relatório analisei informações referentes aos gastos dos Deputados Nordestinos envolvidos na Operação Lava-Jato, durante o corrente ano de 2016. Todos os dados utilizados estão disponíveis na Transparência da Câmara Federal.A análise tem o objetivo de investigar como os seis Deputados Federais Paraibanos gastam suas cotas Parlamentares. Toda a análise presente neste relatório, foi feita em Linguagem R com o auxilio do RMarkdown para gerar este documento. 
 
 # Introdução 
 
