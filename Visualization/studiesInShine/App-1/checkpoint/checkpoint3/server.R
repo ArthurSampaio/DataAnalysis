@@ -37,17 +37,24 @@ gastosDeputadosInvestigados$Descricao <- ordered(gastosDeputadosInvestigados$Des
 
 
 
-  
+#para o gráfico de comparação de despesas
+
 shinyServer(function(input, output){
   output$deputie = renderPlot({
    gastosDeputie = gastosDeputadosInvestigados %>% 
                     filter(Nome == input$deputados) %>% 
                     group_by(Descricao) %>% summarise(total = sum(Valor)) 
-   gastosDeputie = arrange(gastosDeputie, total)
+  
+  
+   
    #plota o gráfico
-    ggplot(gastosDeputie, aes(x =  Descricao, y= total, fill = Descricao)) +
-      geom_bar(stat="identity") + coord_flip()
-    
+    ggplot( gastosDeputie, aes(x =  Descricao, y = total/1e3, fill = Descricao)) +
+      geom_bar(stat="identity") + coord_flip() + xlab("Tipos de Despesas") + ylab("Valor em mil R$")
+      
+  })
+  
+  output$info <- renderText({
+    paste0("Valor em R$ ", input$plot_hover$x)
   })
   
 })

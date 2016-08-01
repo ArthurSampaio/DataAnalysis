@@ -9,14 +9,16 @@
 
 library(shiny)
 
+
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
   
   # Application title
   titlePanel(title = h2("Deputados Nordestinos Investigados na Operação Lava-Jato", align = "center")),
-  h4("Uma rápida análise sobre os gastos dos seis deputados nordestinos investigados", align = "center"),
+  h4("Uma análise sobre os gastos dos seis deputados nordestinos investigados", align = "center"),
   p(""),
   p(""),
+  h5("Por Arthur Sampaio", align = "right"),
   
   h3("A Operação Lava-Jato"),
   p("Nas mídias muito se fala da Operação Lava-Jato, a maior investigação sobre corrupção conduzida até hoje em solo Brasileiro. 
@@ -27,7 +29,11 @@ shinyUI(fluidPage(
   p("Cerca de 22 Deputados Federais, eleitos para representarem o pove, são acusados de pertecerem ao maior esquema de corrupção 
     brasileira que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo do Estado
     Brasileiro. Seis desses vinte e dois deputados acusados são nordestinos o que me deixa com um senso de dever mais agunçado 
-    para saber como estes seis gastam os nossos recursos."),
+    para saber como estes seis gastam os nossos recursos.\n\n\n"),
+  
+  
+  
+  h3("Para começar vamos verificar como cada um gasta suas despesas com a Cota Parlamentar"),
   
   
   sidebarLayout(
@@ -38,8 +44,11 @@ shinyUI(fluidPage(
       
     ),
     mainPanel(
-      plotOutput(outputId = "deputie")
+      plotOutput(outputId = "deputie", hover = "plot_hover"),
+                 verbatimTextOutput("info")
     )
-)
+ )
+ 
+ 
 
 ))
