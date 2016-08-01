@@ -32,33 +32,14 @@ shinyUI(fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      selectInput("deputados", "Escolha o deputado investigado", 
+      selectInput("deputados",
+                  "Escolha o deputado investigado: ", 
                   c("ANÍBAL GOMES", "AGUINALDO RIBEIRO", "ARTHUR LIRA", "EDUARDO DA FONTE", "WALDIR MARANHÃO", "ROBERTO BRITTO"))
       
     ),
     mainPanel(
-      plotOutput(outputId = "deputiePlot")
+      plotOutput(outputId = "deputie")
     )
-),
-  
-  
-  
-  
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-       sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30)
-    ),
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
-    )
-  )
-  
-  
+)
+
 ))

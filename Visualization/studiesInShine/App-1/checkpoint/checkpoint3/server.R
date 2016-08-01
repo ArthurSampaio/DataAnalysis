@@ -13,6 +13,7 @@ theme_set(theme_bw())
 
 #lendo a entrada dos dados
 gastos2016 <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/GastosParlamentares/gastosDeputados/ano-atual.csv")
+
 #selecionando as variáveis escolhidas para trabalhar
 gastosDeputadosInvestigados <- select(gastos2016, sgPartido , txNomeParlamentar, vlrLiquido, txtDescricao, numMes, sgUF, txtFornecedor, txtCNPJCPF)
 
@@ -21,29 +22,16 @@ names(gastosDeputadosInvestigados) <- c("Partido", "Nome", "Valor", "Descricao",
 gastosDeputadosInvestigados <- filter(gastosDeputadosInvestigados, Mes <= 4)
   
 shinyServer(function(input, output){
-  output$deputiePlot = renderPlot({
+  output$deputie = renderPlot({
    gastosDeputadosInvestigados %>%
-      filter(txNomeParlamentar == input$deputados) %>%
-    ggplot(aes(x = Valor)) +
-      geom_histogram(bins = 50)
+      filter(Nome == input$deputados) %>%
+    ggplot(aes(x =  Valor, y = Descricao)) +
+      geom_bar()
     
   })
   
 })
 
 
-# Define server logic required to draw a histogram
-shinyServer(function(input, output) {
-   
-  output$distPlot <- renderPlot({
-    
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2] 
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    
-  })
-  
-})
+
+
