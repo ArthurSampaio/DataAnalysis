@@ -36,8 +36,10 @@ shinyUI(fluidPage(
                   c("ANÍBAL GOMES", "AGUINALDO RIBEIRO", "ARTHUR LIRA", "EDUARDO DA FONTE", "WALDIR MARANHÃO", "ROBERTO BRITTO"))
       
     ),
-    mainPanel()
-  ),
+    mainPanel(
+      plotOutput(outputId = "deputiePlot")
+    )
+),
   
   
   
