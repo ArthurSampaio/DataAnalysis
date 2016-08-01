@@ -23,9 +23,9 @@ gastosDeputadosInvestigados <- filter(gastosDeputadosInvestigados, Mes <= 4)
   
 shinyServer(function(input, output){
   output$deputie = renderPlot({
-   gastosDeputadosInvestigados %>%
-      filter(Nome == input$deputados) %>%
-    ggplot(aes(x =  Valor, y = Descricao)) +
+   gastosDeputie = gastosDeputadosInvestigados %>%  filter(Nome == input$deputados) %>% group_by(Descricao) %>% summarise(total = sum(Valor)) 
+   View(gastosDeputie)
+    ggplot(gastosDeputie, aes(x =  total, y= Descricao)) +
       geom_bar()
     
   })
