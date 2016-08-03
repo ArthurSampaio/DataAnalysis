@@ -38,6 +38,8 @@ shinyUI(fluidPage(
     O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluindo quando e onde ocorreu os gastos, o 
     valor do documento e nome do deputado, entre outras informações importantes."),
   
+  #####COLOCAR UM MAPA COM OS LOCAIS DE ONDE OS POLITICOS SÃO E A BOLINHA COM A COR DO PARTIDO
+  
   
   h3(tags$strong("Antes de mais nada: como é o comportamento desses gastos?")),
   p("Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores 
@@ -113,6 +115,8 @@ shinyUI(fluidPage(
             verbatimTextOutput("hoverExpense")
    )
  )
+ 
+ 
  
  
  
