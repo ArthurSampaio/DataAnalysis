@@ -38,21 +38,27 @@ gastosDeputadosInvestigados$Descricao <- ordered(gastosDeputadosInvestigados$Des
 
 #para o gráfico de gastos de despesa por mês
 
+
+
 shinyServer(function(input, output){
   
   #graph with de behavoir of data
   output$behavoirData = renderPlot({
-    ggplot(gastosDeputadosInvestigados, aes(x = Valor)) +
+    deputadosInvestigados <- c("ANÍBAL GOMES", "AGUINALDO RIBEIRO", "ARTHUR LIRA", "EDUARDO DA FONTE", "WALDIR MARANHÃO", "ROBERTO BRITTO") 
+        gastosInvestigados <- gastosDeputadosInvestigados %>% filter(Nome %in% deputadosInvestigados)
+    ggplot(gastosInvestigados, aes(x = Valor)) +
       geom_histogram(bins = input$precision) + scale_x_log10()
   })
   
+  output$pHover <- renderText({
+    paste0("Valor em R$ ", input$hover$x)
+  })
   
   #Graph for spending by month
   output$deputieMonth = renderPlot({
   gastosDeputie = gastosDeputadosInvestigados %>% 
                     filter(Nome == input$deputados) 
-                    
-   #plota o gráfico
+                
     ggplot( gastosDeputie, aes(x =  Mes, y = Valor/1e3, fill = Mes)) +
       geom_bar(stat="identity") + xlab("Meses") + ylab("Valor em mil R$")
       
@@ -66,13 +72,18 @@ shinyServer(function(input, output){
   #Graph for type expenses
   output$deputieExpense = renderPlot({
     spending = gastosDeputadosInvestigados %>%
-              filter(Nome == input$deputados) %>% group_by(Descricao) %>%
+              filter(Nome == input$deputados, Mes <= 4) %>% group_by(Descricao) %>%
               summarise(total = sum(Valor))
-    #plota o gráfico
     ggplot(spending, aes(x = Descricao, y = total/1e3, fill = Descricao)) +
       geom_bar(stat = "identity") + coord_flip() + labs(title = "Gastos por Despesa", x = "Despesa", y = "Valor em mil R$")
     
   })
+  
+  output$hoverExpense <- renderText({
+    paste0("Valor em R$ ", input$hover_plot$x)
+  })
+  
+  
   
 })
 

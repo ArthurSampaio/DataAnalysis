@@ -34,13 +34,14 @@ shinyUI(fluidPage(
   h3("Os dados"),
   
   p("Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) 
-    foi feita pelo professor Nazareno e disponibilizado no",tags$a(href = "https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz","GitHub"),"
+    foi feita pelo professor Nazareno e disponibilizado no seu",tags$a(href = "https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz","GitHub"),"
     O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluindo quando e onde ocorreu os gastos, o 
-    valor do documento e nome do deputado."),
+    valor do documento e nome do deputado, entre outras informações importantes."),
   
   
   h3(tags$strong("Antes de mais nada: como é o comportamento desses gastos?")),
-  p("ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"),
+  p("Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores 
+    crescem exponencialmente. Para facilitar a visualização é plotada em um gráfico monolog."),
   
   sidebarLayout(
     sidebarPanel(
@@ -50,12 +51,16 @@ shinyUI(fluidPage(
     ),
     
     mainPanel(
-      plotOutput(outputId = "behavoirData")
+      plotOutput(outputId = "behavoirData",hover = "hover"),
+      verbatimTextOutput("pHover")
     )
     
   ),
   
-  p("Através de ")
+  p("Os valores estão concentrados entre R$ 50 e R$ 1000, como mostra o gráfico abaixo. Contudo, a maior 
+    concetração de valores é entorno da mediana (R$ 556,20). Além disto, 75% dos gastos são inferiores a 
+    R$ 565,90. Os valores variam de R$ -1901 referente compensação de bilhete aéreo e o maior valor gasto 
+    é de R$ 39600 do", tags$em("Deputado Roberto Britto"),"referente a divulgação com atividade parlamentar. "),
   
   h3(tags$strong("Para começar vamos verificar como cada um gasta sua Cota Parlamentar mensalmente")),
   
@@ -84,14 +89,17 @@ shinyUI(fluidPage(
  p("Assim, os deputados acima mencionados estão judicialmente amparados e tem ainda 60 dias, no mínimo, para prestar
    conta dos seus gastos. Por esse motivo e com o intuito de aumentar a veracidade das informações aqui levantadas,
     caro leito, irei analisar apenas os gastos referentes aos meses de Janeiro à Abril. Vamos começar esta investigação
-   com os gastos referentes à cada tipo de despesa"),
+   com os gastos referentes à cada tipo de despesa."),
  
  h6("¹Os valores negativos são referentes a compensação de passagens aéreas, que é quando o deputado utiliza do seu próprio dinheiro para
-    realizar a viagem e o CEAP reembolsa o mesmo", align = "right"),
+    realizar a viagem e o CEAP reembolsa o mesmo.", align = "right"),
  
  
  
  h3(tags$strong("Gastos por despesa dos deputados")),
+ 
+ p("A seguir é possível ver quanto cada deputado gastou por despesa durante os meses de Janeiro à Abril. Para ter
+   detalhes do valor basta colocar o curso ao fim da barra para ser calculado o valor gasto naquela despesa."),
  
  sidebarLayout(
    sidebarPanel(
@@ -101,8 +109,12 @@ shinyUI(fluidPage(
      
    ),
    mainPanel(
-     plotOutput(outputId = "deputieExpense")
+     plotOutput(outputId = "deputieExpense", hover = "hover_plot"),
+            verbatimTextOutput("hoverExpense")
    )
  )
+ 
+ 
+ 
 
 ))
