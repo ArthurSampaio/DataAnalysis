@@ -9,6 +9,7 @@
 library(shiny)
 library(dplyr, warn.conflicts = F)
 library(ggplot2)
+library(leaflet)
 theme_set(theme_bw())
 
 ##### PREPARAÇÃO DOS DADOS
@@ -40,7 +41,20 @@ gastosDeputadosInvestigados$Descricao <- ordered(gastosDeputadosInvestigados$Des
 
 
 
-shinyServer(function(input, output){
+shinyServer(function(input, output, session){
+  
+  #graph about the deputie's region 
+  
+  output$deputiesPlace = renderLeaflet({
+    map <- leaflet() %>% addTiles() %>% 
+      addMarkers(lat = -2.892932, lng = -40.116879, popup = "<br><a href = 'http://www.atlaspolitico.com.br/perfil/2/19'>Aníbal Gomes, PMDB</a>") %>%
+      addMarkers(lat = -7.226575, lng = -35.881222, popup = "<br><a href = 'http://www.atlaspolitico.com.br/perfil/2/209'>Aguinaldo Ribeiro, PP</a>") %>%
+      addMarkers(lat = -9.598986, lng = -35.717161, popup = "<br><a href = 'http://www.atlaspolitico.com.br/perfil/2/192'>Arthur Lira, PP</a>") %>%
+      addMarkers(lat = -8.060381, lng = -34.895069, popup = "<br><a href = 'http://www.atlaspolitico.com.br/perfil/2/11'>Eduardo da Fonte, PP</a>") %>%
+      addMarkers(lat = -2.550362, lng = -44.267144, popup = "<br><a href = 'http://www.atlaspolitico.com.br/perfil/2/128'>Waldír Maranhão, PP</a>") %>%
+      addMarkers(lat = -12.970576, lng = -38.458794, popup = "<br><a href = 'http://www.atlaspolitico.com.br/perfil/2/178921'>Roberto Britto, PP</a>")
+  })
+  
   
   #graph with de behavoir of data
   output$behavoirData = renderPlot({
@@ -59,7 +73,7 @@ shinyServer(function(input, output){
   #Graph for spending by month
   output$deputieMonth = renderPlot({
   gastosDeputie = gastosDeputadosInvestigados %>% 
-                    filter(Nome == input$deputados) 
+                    filter(Nome == input$deputiesName) 
     #plot            
     ggplot( gastosDeputie, aes(x =  Mes, y = Valor/1e3, fill = Mes)) +
       geom_bar(stat="identity") + xlab("Meses") + ylab("Valor em mil R$") + ggtitle("Valor gasto por mês da CEAP")
@@ -76,8 +90,10 @@ shinyServer(function(input, output){
     spending = gastosDeputadosInvestigados %>%
               filter(Nome == input$deputados, Mes <= 4) %>% group_by(Descricao) %>%
               summarise(total = sum(Valor))
+    #order bars
+    
     #plot
-    ggplot(spending, aes(x = Descricao, y = total/1e3, fill = Descricao)) +
+    ggplot(spending, aes(x =  reorder(Descricao, -total), y =total/1e3, fill = Descricao, na.rm = FALSE)) +
       geom_bar(stat = "identity") + coord_flip() + labs(title = "Gastos por Despesa", x = "Despesa", y = "Valor em mil R$")
     
   })
@@ -85,6 +101,12 @@ shinyServer(function(input, output){
   output$hoverExpense <- renderText({
     paste0("Valor em R$ ", input$hover_plot$x)
   })
+  
+  #Graph about all spending by expenditure
+  
+  
+  
+  
   
   
 })

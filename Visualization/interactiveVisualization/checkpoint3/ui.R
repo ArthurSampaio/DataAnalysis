@@ -18,13 +18,14 @@ shinyUI(fluidPage(
   h4("Uma análise sobre os gastos dos seis deputados nordestinos investigados", align = "center"),
   p(""),
   p(""),
-  h5("Por Arthur Sampaio", align = "right"),
+  h5("Por", tags$a(href= "https://www.linkedin.com/in/arthursampaiopcorreia?", "Arthur Sampaio"), align = "right"),
   
   h2("A Operação Lava-Jato"),
   p("Nas mídias muito se fala da Operação Lava-Jato, a maior investigação sobre corrupção conduzida até hoje em solo Brasileiro. 
     Ela começou investigando uma rede de doleiros que atuavam em vários setores e Estados e descobriu um vasto esquema de corrupção
     na maior estatal do país - A Petrobrás, envolvendo desde políticos às maiores empreiteras do Brasil. Para enteder mais sobre 
-    a Operação Lava Jato o ", tags$a(href = "http://lavajato.mpf.mp.br/entenda-o-caso", "Ministério Público Federal"), "criou um portal que explica detalhadamente."),
+    a Operação Lava Jato o ", tags$a(href = "http://lavajato.mpf.mp.br/entenda-o-caso", "Ministério Público Federal"), "criou um portal que explica sucintamente 
+    todo os processos da operação."),
   
   p("Cerca de 22 Deputados Federais, eleitos para representarem o pove, são acusados de pertecerem ao maior esquema de corrupção 
     brasileira que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo do Estado
@@ -34,12 +35,19 @@ shinyUI(fluidPage(
   h3("Os dados"),
   
   p("Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) 
-    foi feita pelo professor Nazareno e disponibilizado no seu",tags$a(href = "https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz","GitHub"),"
-    O arquivo conta com as descrições dos dados parlamentares distribuídos em vinte e nova (29) variáveis, incluindo quando e onde ocorreu os gastos, o 
-    valor do documento e nome do deputado, entre outras informações importantes."),
+    foi feita pelo professor Nazareno e disponibilizado no seu",tags$a(href = "https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz","GitHub"),". 
+    O banco de dados conta com as descrições dos dados parlamentares distribuídos em vinte e nove (29) variáveis, incluindo quando e onde ocorreu os gastos, o 
+    valor do documento e nome do deputado, entre outras informações importantes para a análise."),
   
-  #####COLOCAR UM MAPA COM OS LOCAIS DE ONDE OS POLITICOS SÃO E A BOLINHA COM A COR DO PARTIDO
+  h3("Quem são os deputados?"),
   
+  p("Para começar vamos saber quem e da onde são os seis deputados investigados pela Operação Lava-Jato"),
+  p("Clique sobre um dos pontos marcados no mapa abaixo para ter informações sobre o respectivo deputado. Todas as informações sobre os deputados foram encontradas
+    na plataforma", tags$strong("Atlas Político")),
+  
+  leafletOutput("deputiesPlace"),
+  p(),
+
   
   h3(tags$strong("Antes de mais nada: como é o comportamento desses gastos?")),
   p("Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores 
@@ -73,7 +81,7 @@ shinyUI(fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      selectInput("deputados",
+      selectInput("deputiesName",
                   "Escolha o deputado investigado: ", 
                   c("ANÍBAL GOMES", "AGUINALDO RIBEIRO", "ARTHUR LIRA", "EDUARDO DA FONTE", "WALDIR MARANHÃO", "ROBERTO BRITTO"))
       
@@ -114,8 +122,11 @@ shinyUI(fluidPage(
      plotOutput(outputId = "deputieExpense", hover = "hover_plot"),
             verbatimTextOutput("hoverExpense")
    )
- )
+ ),
  
+ p("O atual Presidente da República Michel Temer nos últimos meses lançou uma série de medidas para enxugar o gasto
+  público os cortes foram sobretudo na áreas de ", tags$a(href = "http://exame.abril.com.br/economia/noticias/grupo-de-temer-avalia-desvincular-beneficios-do-minimo","Saúde e Educação"), 
+  ", basta pesquisar um pouco na internet para ver mais cortes nessas duas áreas tão importantes para a qualidade de vida dos Brasileiros. ")
  
  
  
