@@ -10,6 +10,7 @@ library(shiny)
 library(dplyr, warn.conflicts = F)
 library(ggplot2)
 library(leaflet)
+library(rsconnect)
 theme_set(theme_bw())
 
 ##### PREPARAÇÃO DOS DADOS
@@ -73,7 +74,7 @@ shinyServer(function(input, output, session){
   #Graph for spending by month
   output$deputieMonth = renderPlot({
   gastosDeputie = gastosDeputadosInvestigados %>% 
-                    filter(Nome == input$deputiesName, Mes <= 4) 
+                    filter(Nome == input$deputiesName) 
     #plot            
     ggplot( gastosDeputie, aes(x =  Mes, y = Valor/1e3, fill = Mes)) +
       geom_bar(stat="identity") + xlab("Meses") + ylab("Valor em mil R$") + ggtitle("Valor gasto por mês da CEAP")

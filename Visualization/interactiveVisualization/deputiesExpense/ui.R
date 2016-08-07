@@ -15,7 +15,7 @@ shinyUI(fluidPage(
   theme = "bootstrap.css",
   
   # Application title
-  titlePanel(title = h2("Deputados Nordestinos Investigados na Operação Lava-Jato", align = "center")),
+  titlePanel("Deputados Nordestinos Investigados na Operação Lava-Jato"),
   h4("Uma análise sobre os gastos dos seis deputados nordestinos investigados", align = "center"),
   p(""),
   p(""),
@@ -28,28 +28,18 @@ shinyUI(fluidPage(
     a Operação Lava Jato o ", tags$a(href = "http://lavajato.mpf.mp.br/entenda-o-caso", "Ministério Público Federal"), "criou um portal que explica sucintamente 
     todo os processos da operação."),
   
-  p("Cerca de 22 Deputados Federais, eleitos para representarem o pove, são acusados de pertecerem ao maior esquema de corrupção 
-    brasileira que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo do Estado
-    Brasileiro. Seis desses vinte e dois deputados acusados são nordestinos o que me deixa com um senso de dever mais agunçado 
-    para saber como estes seis gastam os nossos recursos, que são destinados à CEAP - Cota para Exercício da Atividade Parlamentar.\n\n\n"),
+  p("Cerca de 22 Deputados Federais, eleitos para representarem o povo, são acusados de pertecerem ao maior esquema de corrupção 
+    brasileira que custou diretamente aos cofres públicos mais de R$ 6 bilhões que poderiam ser gastos por nós, povo. Seis desses vinte e dois deputados acusados são 
+    nordestinos o que me deixa com um senso de dever mais agunçado para saber como estes seis gastam os nossos recursos, que são destinados à CEAP - Cota para Exercício da Atividade Parlamentar.\n\n\n"),
   
   h3("Os dados"),
   
-  p("Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) 
-    foi feita pelo professor Nazareno e disponibilizado no seu",tags$a(href = "https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz","GitHub"),". 
+  p("Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para .csv (comma-separated value) 
+    foi feita pelo professor Nazareno e disponibilizado no seu",tags$a(href = "https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/ano-atual.csv.tgz","GitHub"), "pessoal. 
     O banco de dados conta com as descrições dos dados parlamentares distribuídos em vinte e nove (29) variáveis, incluindo quando e onde ocorreu os gastos, o 
     valor do documento e nome do deputado, entre outras informações importantes para a análise."),
   
-  h3("Quem são os deputados?"),
-  
-  p("Para começar vamos saber quem e da onde são os seis deputados investigados pela Operação Lava-Jato"),
-  p("Clique sobre um dos pontos marcados no mapa abaixo para ter informações sobre o respectivo deputado. Todas as informações sobre os deputados foram encontradas
-    na plataforma", tags$strong("Atlas Político"), "que auxilia na nossa investigação."),
-  
-  leafletOutput("deputiesPlace"),
-  p(),
-
-  
+ 
   h3(tags$strong("Antes de mais nada: como é o comportamento desses gastos?")),
   p("Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores 
     crescem exponencialmente. Para facilitar a visualização é plotada em um gráfico monolog."),
@@ -71,13 +61,14 @@ shinyUI(fluidPage(
   p("Os valores estão concentrados entre R$ 50 e R$ 1000, como mostra o gráfico abaixo. Contudo, a maior 
     concetração de valores é entorno da mediana (R$ 556,20). Além disto, 75% dos gastos são inferiores a 
     R$ 565,90. Os valores variam de R$ -1901 referente compensação de bilhete aéreo e o maior valor gasto 
-    é de R$ 39600 do", tags$em("Deputado Roberto Britto"),"referente a divulgação com atividade parlamentar. "),
+    é de R$ 39,6 mil do", tags$em("Deputado Roberto Britto"),"referente a divulgação com atividade parlamentar. "),
   
-  h3(tags$strong("Para começar vamos verificar como cada um gasta sua Cota Parlamentar mensalmente")),
+  h3(tags$strong("Vamos verificar como cada deputado gasta sua Cota Parlamentar mensalmente?")),
   
   p("Abaixo está os gastos mensais dos Senhores Deputados referentes a sua cota Parlamentar. É perciptível que
     alguns deputados como os senhores",tags$strong("Aníbal Gomes e Waldír Maranhão"), "ainda não prestaram contas
     dos seus gastos referentes aos meses de Maio e junho. Qual o motivo dessa não prestação de contas?"),
+  p("Ao pesquisar em páginas pessoais dos deputados não encontrei nenhuma informação sobre este motivo, em seguida fui pesquisar o que a legislação diz nesses casos."),
   
   sidebarLayout(
     sidebarPanel(
@@ -92,7 +83,7 @@ shinyUI(fluidPage(
     )
  ),
  
- p("Após pesquisar nas páginas da Câmara Federal encontrei o",tags$a(href = "http://www2.camara.leg.br/a-camara/estruturaadm/deapa/portal-da-posse/ato-da-mesa-43-ceap", "Ato de Mesa de número 43"),
+ p("Após me debruçar nas páginas da Câmara Federal encontrei o",tags$a(href = "http://www2.camara.leg.br/a-camara/estruturaadm/deapa/portal-da-posse/ato-da-mesa-43-ceap", "Ato de Mesa de número 43"),
     ", que no seu artigo 4 tem o seguinte insiso: ", align = "justify"),
  p(tags$em("§ 12. A apresentação da documentação comprobatória do gasto disciplinado pela Cota de que trata este 
           Ato dar-se-á no prazo máximo de noventa dias após o fornecimento do produto ou serviço.")),
@@ -103,6 +94,25 @@ shinyUI(fluidPage(
  
  h6("¹Os valores negativos são referentes a compensação de passagens aéreas, que é quando o deputado utiliza do seu próprio dinheiro para
     realizar a viagem e o CEAP reembolsa o mesmo.", align = "right"),
+ 
+ p("Além disto, o deputado baiano Roberto Britto no mês de Abril gastou mais de R$ 60 mil reais,", tags$a(href = 'http://www2.camara.leg.br/a-camara/estruturaadm/deapa/portal-da-posse/ceap-1', "R$ 25 mil"),
+   " a mais do que sua cota mensal. Já que cada deputado só pode gastar mensalmente um valor determinado pela legislação,  
+  há algum anteparo legal que permite que o deputado em questão gaste 170% da sua cota sem nenhuma fiscalização?"),
+ 
+ p("Para responder mais uma questão foi recorrer aos Atos de Mesas da Câmara e encontrei o", tags$a( href = 'http://www2.camara.leg.br/legin/int/atomes/2009/atodamesa-43-21-maio-2009-588364-publicacaooriginal-112820-cd-mesa.html'," Ato de Mesa de número 23"),
+  ", especificamente no Artigo 13, que diz o seguinte: "),
+ 
+ p(tags$em("Art. 13. O saldo da Cota não utilizado acumula-se ao longo do exercício financeiro, vedada a acumulação de saldo de
+    um exercício para o seguinte.")),
+
+ p(tags$em("Parágrafo 1º - A Cota somente poderá ser utilizada para despesas de competência do respectivo exercício financeiro.")), 
+
+ p(tags$em("Parágrafo 2º - A importância que exceder, no exercício financeiro, o saldo de Cota disponível será deduzida automática e 
+           integralmente da remuneração do parlamentar ou do saldo de acerto de contas de que ele seja credor, revertendo-se à conta 
+           orçamentária própria da Câmara dos Deputados. ")),
+ 
+ p("Diante do descrito pela legislação é notório a facilidade em que os deputados têm para exceder suas cotas. Ainda é possível concluir que 
+   o valor mensal da CEAP nem sempre é respeitado pelos Deputados, uma vez que o exercício financeiro é referente ao período de um ano."),
  
  
  
@@ -167,8 +177,10 @@ shinyUI(fluidPage(
    
  h3("Chegamos ao fim..."),
  
- p("Nossa análise chegou ao fim, mas não fique triste! Juntos investigamos o comportamento dos gastos dos seis deputados investigado e exercemos o nosso direito de cidadãos.
-  Novas análises irão ocorrer e vocês ficaram a par de tudo!")
+ p("Nossa análise chegou ao fim, vimos que os mecanismos legais para controlar os gastos dos deputados na realidade são defasadas e possuem furos, como mostrei acima.
+  Dificil pedir isto, mas não fique triste! Juntos investigamos o comportamento dos gastos dos seis deputados investigado e exercemos o nosso direito e dever de cidadãos.
+  Novas análises irão ocorrer e vocês ficaram a par de tudo!"),
  
-    
+ h5("Campina Grande - 07 de Agosto de 2016", align = "center")
+ 
 ))
