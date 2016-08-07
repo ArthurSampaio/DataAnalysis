@@ -145,17 +145,18 @@ shinyUI(fluidPage(
    qualidade de vida dos cidadãos dessas localidades. Diante dos gastos de milhares de reais por conta da CEAP, o que poderia ser
    feito com esse recurso?"),
  
- h4("1. Construção de novas onze (11) cisternas!"),
+ h4("1. Construção de novas trinta (30) cisternas!"),
  
- p("Segundo o", tags$a(href = "http://www.brasil.gov.br/infraestrutura/2016/01/governo-entrega-1-7-mil-cisternas-em-escolas-no-semiarido-em-2015", "Portal Brasil"),
-   "cada cisterna custa R$ 13 mil. O valor gasto até o mês de Abril com as despesas de Locação de Veículos e Combustíveis somam mais de R$ 152 mil, 
-   o suficiente para construir onze (11) cisternas de águas para comunidades isoladas do Nordeste."),
- p("  "),
+ p("Segundo o", tags$a(href = "http://g1.globo.com/economia/agronegocios/noticia/2012/03/governo-troca-cisternas-de-cimento-por-reservatorios-de-plastico.html", "G1"),
+   "cada cisterna de 16 mil litros de água doada pelo governo custa R$ 5 mil aos cofres publicos; . O valor gasto até o mês de Abril com as despesas de Locação de Veículos e Combustíveis somam mais de R$ 152 mil, 
+   o suficiente para construir trinta (30) cisternas de águas para comunidades isoladas do Nordeste."),
+ img(src = "cisternas.jpg", height = 300, width = 300),
  
  h4("2. 438 caminhões pipas abastecidos com 15 mil litros de água potável"),
  p("  "),
  p("O valor gasto com Passagens Aéreas dos seis deputados investigados durante o período de Janeiro à Abril é da ordem de R$ 175 mil reais, 
    o suficiente para pagar mais 430 caminhões-pipa para abastecer as comunidades que sofrem com a falta d'água."),
+ img(src = "caminhao_pipa.jpg", height = 300, width = 300),
  
  h4("3. Trinta e seis (36) novos alunos no Ensino Médio"),
  

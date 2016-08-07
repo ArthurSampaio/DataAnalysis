@@ -110,7 +110,7 @@ shinyServer(function(input, output, session){
       filter(Nome %in% c("ANÍBAL GOMES", "AGUINALDO RIBEIRO", "ARTHUR LIRA", "EDUARDO DA FONTE", "WALDIR MARANHÃO", "ROBERTO BRITTO") , Mes <= 4) %>% group_by(Descricao) %>%
       summarise(total = sum(Valor))
     
-      ggplot(expenses, aes(x =  reorder(Descricao, -total), y = total, fill = Descricao)) + 
+      ggplot(expenses, aes(x =  reorder(Descricao, -total), y = total/1e3, fill = Descricao)) + 
       geom_bar(stat = "identity") +  coord_flip() + labs(title = "Total de Gastos por Despesa", x = "Despesa", y = "Valor em mil R$")+ theme(legend.position="none") 
        
          
