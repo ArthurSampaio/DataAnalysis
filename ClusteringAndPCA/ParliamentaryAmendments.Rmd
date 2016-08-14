@@ -1,0 +1,185 @@
+---
+title: "Análise das Emendas Parlamentares"
+author: "Arthur Sampaio"
+date: "14 de agosto de 2016"
+output:
+  html_document:
+    theme: yeti
+    toc: true
+    toc_float: true
+    fig_width: 5
+    fig_height: 4
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  theme_set(theme_bw())
+```
+
+#Resumo
+
+Neste relatório analisei informações sobre verbas alocadas por parlamentar paraibano para entidades através das Emendas Parlamentares na atual legislatura que começou em 2015. Todos os dados utilizados estão disponíveis na Transparência da Câmara Federal. A análise presente neste relatório foi feita em Linguagem R com o auxilio do RMarkdown para gerar este documento.
+
+#Os Dados
+
+Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no seu [GitHub](https://github.com/nazareno/ciencia-de-dados-1). Os arquivos contam com as descrições dos repasses através das emendas parlamentares por deputado e por repasse distribuidas em mais de vinte (20) variáveis. 
+
+
+#Você sabe o que é Emenda Parlamentar? 
+
+Segundo a nossa Constituição, a emenda parlamentar é o mecanismo que o Congresso Nacional possui para participar da elaboração do orçamento anual da União. Através das emendas os parlamentares procuram aperfeiçoar a proposta encaminhada pelo Poder Executivo, visando uma melhor alocação dos recursos públicos. 
+
+####Trocando em miúdos... Entenda como funciona a emenda parlamentar?
+
+O vereador solicita que uma emenda parlmentar seja incluída no orçamento da União para determinado fim. O Deputado elabora o pedido de emenda e envia ao Executivo que irá avaliar se a emenda será aprovada ou não. Sempre que uma emenda é aprovada o Prefeito do município é notificado que a verba já está disponível. Cada Parlamentar Federal, desde 2015, passou a ter R$15 milhões anuais para atender aos pedidos de emenda no Orçamento Anual. 
+
+#Preparando os dados
+
+Os dados que irei utilizar são referentes ao gasto total por área de cada Deputado e a descrição de cada Emenda Parlamentar nos últimos três anos. 
+
+Para isto irei filtrar o arquivo com os detalhes da emenda parlamentar apenas para os anos de 2015 e 2016 e para os deputados dafuncao.imputada paraíba. 
+
+```{r}
+#lendo os dados
+emendas.detalhes <- read.csv("~/Documentos/sampaio/AnaliseDeDados/DataAnalisys/ClusteringAndPCA/data/emendas_detalhes_parlamentar.csv")
+
+#filtrando para os anos da legislatura e o Estado da Paraíba. 
+
+emendas.detalhes <- emendas.detalhes %>% filter(UF_PROPONENTE == "PB", ANO_PROP >= 2015)
+
+```
+
+Semelhante ao que aconteceu acima, o dataframe que se refere as emendas por área foram filtradas para cada Parlamentar Paraibano.
+
+```{r}
+#lendo os dados 
+emendas.area <- read.csv("~/Documentos/sampaio/AnaliseDeDados/DataAnalisys/ClusteringAndPCA/data/emendas_area_parlamentar.csv")
+
+#criando um novo dataframe com o nome dos parlamentares paraibanos para posteriormente filtrá-los do dataframe acima. 
+#somei os valores das emendas para poder agrupar os nomes dos parlamentares corretamente
+parlamentares = emendas.detalhes %>% group_by(NOME_PARLAMENTAR) %>% summarise(total = sum(VL_REPASSE_PROP))
+
+#filtrando em emendas.area os nomes do parlamentares
+
+emendas.area = emendas.area %>% filter(NOME_PARLAMENTAR %in% parlamentares$NOME_PARLAMENTAR)
+
+```
+
+Ainda não concluimos a preparação dos dados. O dataframe referente aos detalhes de cada emenda possuem muitas variáveis, aonde várias não serão utilizadas para o nosso propósito, por isso irei selecionar as seguintes variáveis num novo dataframe. 
+
+* NOME_PARLAMENTAR - Nome do parlamentar
+* VALOR_REPASSE_EMENDA - Valor repassado para a prefeitura pela emenda
+* IND_IMPOSITIVO - Mostra se o Governo Federal é obrigado a financiar a emenda
+* MUNIC_PROPONENTE - Município proponente da emenda
+* MES_PROP - Mês da proposta da emenda
+* ANO_PROP - Ano da proposta da emenda
+* DIA_PROP - Dia da proposta da emenda
+* OBJETO_PROPOSTA - O objetivo final da proposta de emenda
+* funcao.imputada - A área a qual a emenda é destinada
+
+```{r, echo=FALSE}
+emendas.detalhes = emendas.detalhes %>% select(NOME_PARLAMENTAR, VALOR_REPASSE_EMENDA, 
+                                               IND_IMPOSITIVO, 
+                                               MUNIC_PROPONENTE, MES_PROP, ANO_PROP,
+                                               DIA_PROP, OBJETO_PROPOSTA, 
+                                               funcao.imputada)  
+
+#Renomando as variaveis para facilitar a análise :)
+
+names(emendas.detalhes) <- c("Nome", "Valor_Repasse", "Impositivo", "Municipio", "Mes", "Ano",
+                             "Dia", "Objetivo_emenda", "Área") 
+```
+
+#Conhecendo nossos dados
+
+Após a exaustiva tarefa de preparar os nossos dados vamos conhecê-los um pouco. 
+
+```{r}
+  ggplot(emendas.detalhes, aes(x = Valor_Repasse/1e6))+
+  geom_histogram(bins = 50) + labs(title = "Histograma dos Dados", x = "Valor do Repasse em cem mil reais", y = "qnt")
+
+```
+
+Os valores estão muito concentrados a esquerda do gráfico, assimétricos , além disto os valores crescem exponencialmente. Para facilitar a visualização é plotado um gráfico monolog.
+
+```{r}
+  ggplot(emendas.detalhes, aes(x = Valor_Repasse/1e6))+
+    geom_histogram(bins = 50) + labs(title = "Histograma dos Dados em monolog", x = "Valor do Repasse em cem mil reais", y = "qnt") + scale_x_log10()
+```
+
+```{r, echo=FALSE}
+  summary(emendas.detalhes$Valor_Repasse)
+```
+
+A maior concentração de valores está ao redor da mediana R$ 295300. Os valores máximo e mínimo são respectivamente de  R$ 44990 e R$ 3150000.
+
+Continuando a conhecer um pouco dos nossos dados, no gráfico abaixo é possível ver os recursos das emendas destinadas por área. 
+
+```{r, echo=FALSE}
+
+emendas.detalhes %>% group_by(Área) %>% summarise(Valor_Total = sum(Valor_Repasse)) %>%
+
+ggplot(aes(x = reorder(Área, -Valor_Total), y = Valor_Total/1e6, fill = Área)) +
+    geom_bar(stat = "identity") + coord_flip() + theme(legend.position="none") + 
+    labs(title = "Área por Recurso alocado", x = "Áreas destinadas", y = "Valor do Repasse Total em cem mil reais")
+
+```
+
+Assim, é possível notar que desde 2015 até o presente momento a área que mais recebeu investimento das emendas são Saneamento Básico e Urbanismo, ambas pertecentes a pasta de Infraestrutura. 
+
+#Agrupamento dos dados
+
+Apartir desta seção irei responder as questões propostas pelo Professor Nazareno para auxiliar na descrição e exploração dos dados. Meu objetivo é agrupar os parlamentares paraibanos de acordo com o destino das emendas parlamentares e daí extrair informações sobre o dataframe. 
+
+## I. Que método você escolheu usar e por quê?
+
+Para escolher o melhor método de agrupamento é necessário avaliar cada um dos métodos disponíveis, _K-means_ e _Hierarchical Clustering (HC)_. 
+
+__Em tempo de execução__ 
+
+O Algoritmo K-means trabalha com um tempo de complexidade linear, ou seja, O(n), onde n é o número de objetos. Já o algorítimo HC tem, em média, complexidade quadrática, isto é, O(n^2^). Ou seja, para um mesmo dataframe HC gasta o quadrado do tempo de execuação do K-means. 
+
+__Em repetição do Algoritmo__
+
+K-means começa com escolhas aleatórias de centros dos clusters, e por consequência pode produzir resultados distintos em diferentes execuções. Assim, os resultados, muitas vezes, não podem ser repetidos causando inconscientência nos dados. 
+
+Fora que, o K-means precisa de um número inicial K (número de clusters), enquanto que no HC o agrupamento pode parar em qualquer nível. 
+
+Segundo, [Kaur](http://www.ijarcsse.com/docs/papers/Volume_3/7_July2013/V3I7-0565.pdf) em seu artigo públicado na _International Journal of Advanced Research in Computer Science and Software Engineering_ , em geral o K-means é bom para grandes quantidades de dados e o HC é bom para pequenos dataframes. 
+
+Assim, pelo exposto acima o método escolhido foi o __Hierarchical Clustering__. 
+
+
+## II. Que parâmetros usou no método e por quê? 
+
+Antes de determinar o parâmetro referente a quantidade de clusters, é interessante observa o dendograma do dataframe em questão e determinar este parâmetro. O algoritmo escolhido para o Hierarchical Clustering é o "complete" que calcula a maior distância entre pontos em diferentes clusters, criando clusters e subclusters. 
+
+
+```{r}
+  emendas.area2 = apply(emendas.area[ , 2:ncol(emendas.area)], MARGIN = 2, scale)
+  emendas.area2.dist = dist(emendas.area2)
+  emendas.area2.hclust = hclust(emendas.area2.dist, method = "ward.D2")
+  plot(emendas.area2.hclust, hang = -1, labels = FALSE)
+ 
+```
+
+
+
+```{r}
+ emendas.area_hclust <- emendas.area2 %>% select(Agricultura, Assistência.Social, 
+                                                 Ciência.e.Tecnologia, Comércio.e.Serviços,
+                                                 Cultura, Defesa.Nacional, Desporto.e.Lazer, 
+                                                 Direitos.da.Cidadania, Gestão.Ambiental,
+                                                 Indústria, Organização.Agrária, Outros,
+                                                 Saneamento, Saúde, Segurança.Pública, 
+                                                 Trabalho, Urbanismo) %>% 
+                        dist() %>%
+                        hclust(method = "complete") %>% #o default é o metodo complete 
+                        plot()
+```
+
