@@ -157,29 +157,54 @@ Assim, pelo exposto acima o método escolhido foi o __Hierarchical Clustering__.
 
 ## II. Que parâmetros usou no método e por quê? 
 
-Antes de determinar o parâmetro referente a quantidade de clusters, é interessante observa o dendograma do dataframe em questão e determinar este parâmetro. O algoritmo escolhido para o Hierarchical Clustering é o "complete" que calcula a maior distância entre pontos em diferentes clusters, criando clusters e subclusters. 
+Antes de determinar o parâmetro referente a quantidade de clusters, é interessante observa o dendograma do dataframe em questão e determinar este parâmetro.
+O algoritmo escolhido para o Hierarchical Clustering foi o "ward.D2", descrito [aqui](http://adn.biol.umontreal.ca/~numericalecology/Reprints/Murtagh_Legendre_J_Class_2014.pdf). O método Ward utiliza uma abordagem distinta dos métodos comuns - complete, single, average, centroid. A análise da variância para avaliar distâncias entre os clusters. O método tenta minimizar a soma dos quadrados de dois grupos hipotéticos que são formados a cada passo. O método é eficiente, mas tente a criar grupos pequenos, como é possível ver no dendograma abaixo. 
 
 
 ```{r}
-  emendas.area2 = apply(emendas.area[ , 2:ncol(emendas.area)], MARGIN = 2, scale)
+  emendas.area2 = apply(emendas.area[  , 2:ncol(emendas.area)], MARGIN = 2, scale)
   emendas.area2.dist = dist(emendas.area2)
-  emendas.area2.hclust = hclust(emendas.area2.dist, method = "ward.D2")
+  (emendas.area2.hclust = hclust(emendas.area2.dist,  method = "ward.D2"))
   plot(emendas.area2.hclust, hang = -1, labels = FALSE)
- 
+  
+```
+
+Para escolher um bom parâmetro k é necessário observa a distância entre os clusters que pode ser visualizado no eixo y. Entre y = 0 e y = 5, há 4 subclusters que possui poucas distâncias entre si. Assim, k = 4.
+
+```{r}
+    plot(emendas.area2.hclust, hang = -1, labels = FALSE)
+    rect.hclust(emendas.area2.hclust, k = 4)
+
+```
+
+Após os dados estarem agrupados, basta plotar o gráfico. 
+
+```{r}
+  emendas.area.agrup = cutree(emendas.area2.hclust, k = 3)
+  ggplot(emendas.area, aes(x = Agricultura, y = Ciência.e.Tecnologia)) +
+     geom_point(aes(color = factor(emendas.area.agrup), alpha = 0.1))
 ```
 
 
 
+
+#LIXO?
 ```{r}
- emendas.area_hclust <- emendas.area2 %>% select(Agricultura, Assistência.Social, 
-                                                 Ciência.e.Tecnologia, Comércio.e.Serviços,
-                                                 Cultura, Defesa.Nacional, Desporto.e.Lazer, 
-                                                 Direitos.da.Cidadania, Gestão.Ambiental,
-                                                 Indústria, Organização.Agrária, Outros,
-                                                 Saneamento, Saúde, Segurança.Pública, 
-                                                 Trabalho, Urbanismo) %>% 
-                        dist() %>%
-                        hclust(method = "complete") %>% #o default é o metodo complete 
-                        plot()
+  emendas.area2 = emendas.area %>% select(Agricultura, Assistência.Social,Ciência.e.Tecnologia,Comércio.e.Serviços,
+                         Cultura,Defesa.Nacional, Desporto.e.Lazer, Direitos.da.Cidadania, 
+                         Gestão.Ambiental,Indústria, Organização.Agrária, Outros, Saneamento,
+                         Saúde, Segurança.Pública, Trabalho, Urbanismo) %>% dist() %>%
+              hclust(method = "ward.D2")
+
+```
+
+```{r}
+  library(ggfortify)
+  df <- emendas.area %>% select(Agricultura, Assistência.Social,Ciência.e.Tecnologia,Comércio.e.Serviços,
+                         Cultura,Defesa.Nacional, Desporto.e.Lazer, Direitos.da.Cidadania, 
+                         Gestão.Ambiental,Indústria, Organização.Agrária, Outros, Saneamento,
+                         Saúde, Segurança.Pública, Trabalho, Urbanismo)
+  autoplot(prcomp(df))
+
 ```
 
