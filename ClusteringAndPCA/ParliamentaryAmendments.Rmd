@@ -1,5 +1,5 @@
 ---
-title: "Análise das Emendas Parlamentares"
+-title: "Análise das Emendas Parlamentares"
 author: "Arthur Sampaio"
 date: "14 de agosto de 2016"
 output:
@@ -7,8 +7,8 @@ output:
     theme: yeti
     toc: true
     toc_float: true
-    fig_width: 5
-    fig_height: 4
+    fig_width: 10
+    fig_height: 5
 ---
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -42,15 +42,15 @@ O vereador solicita que uma emenda parlmentar seja incluída no orçamento da Un
 
 Os dados que irei utilizar são referentes ao gasto total por área de cada Deputado e a descrição de cada Emenda Parlamentar nos últimos três anos. 
 
-Para isto irei filtrar o arquivo com os detalhes da emenda parlamentar apenas para os anos de 2015 e 2016 e para os deputados dafuncao.imputada paraíba. 
+Para isto irei filtrar o arquivo com os detalhes da emenda parlamentar apenas para os anos de 2015 e 2016 e para os deputados da paraíba. Como meu objetivo é estudar os deputados federais, tirei do dataset os objetos compreendidos para os senadores da república. 
 
 ```{r}
 #lendo os dados
 emendas.detalhes <- read.csv("~/Documentos/sampaio/AnaliseDeDados/DataAnalisys/ClusteringAndPCA/data/emendas_detalhes_parlamentar.csv")
 
 #filtrando para os anos da legislatura e o Estado da Paraíba. 
-
-emendas.detalhes <- emendas.detalhes %>% filter(UF_PROPONENTE == "PB", ANO_PROP >= 2015)
+'%ni%' <- Negate('%in%')
+emendas.detalhes <- emendas.detalhes %>% filter(UF_PROPONENTE == "PB", ANO_PROP >= 2015, TIPO_PARLAMENTAR == "INDIVIDUAL", NOME_PARLAMENTAR %ni% c("CASSIO CUNHA LIMA", "CICERO LUCENA", "JOSE MARANHAO") )  #retirando cássio, cicero e maranhão.
 
 ```
 
@@ -116,7 +116,7 @@ Os valores estão muito concentrados a esquerda do gráfico, assimétricos , al�
   summary(emendas.detalhes$Valor_Repasse)
 ```
 
-A maior concentração de valores está ao redor da mediana R$ 295300. Os valores máximo e mínimo são respectivamente de  R$ 44990 e R$ 3150000.
+A maior concentração de valores está ao redor da mediana R$ 295300. Os valores máximo e mínimo são respectivamente de  R$ 44990 e R$ 2000000.
 
 Continuando a conhecer um pouco dos nossos dados, no gráfico abaixo é possível ver os recursos das emendas destinadas por área. 
 
@@ -131,6 +131,7 @@ ggplot(aes(x = reorder(Área, -Valor_Total), y = Valor_Total/1e6, fill = Área))
 ```
 
 Assim, é possível notar que desde 2015 até o presente momento a área que mais recebeu investimento das emendas são Saneamento Básico e Urbanismo, ambas pertecentes a pasta de Infraestrutura. 
+
 
 #Agrupamento dos dados
 
@@ -160,7 +161,6 @@ Assim, pelo exposto acima o método escolhido foi o __Hierarchical Clustering__.
 Antes de determinar o parâmetro referente a quantidade de clusters, é interessante observa o dendograma do dataframe em questão e determinar este parâmetro.
 O algoritmo escolhido para o Hierarchical Clustering foi o "ward.D2", descrito [aqui](http://adn.biol.umontreal.ca/~numericalecology/Reprints/Murtagh_Legendre_J_Class_2014.pdf). O método Ward utiliza uma abordagem distinta dos métodos comuns - complete, single, average, centroid. A análise da variância para avaliar distâncias entre os clusters. O método tenta minimizar a soma dos quadrados de dois grupos hipotéticos que são formados a cada passo. O método é eficiente, mas tente a criar grupos pequenos, como é possível ver no dendograma abaixo. 
 
-
 ```{r}
   emendas.area2 = apply(emendas.area[  , 2:ncol(emendas.area)], MARGIN = 2, scale)
   emendas.area2.dist = dist(emendas.area2)
@@ -169,34 +169,39 @@ O algoritmo escolhido para o Hierarchical Clustering foi o "ward.D2", descrito [
   
 ```
 
-Para escolher um bom parâmetro k é necessário observa a distância entre os clusters que pode ser visualizado no eixo y. Entre y = 0 e y = 5, há 4 subclusters que possui poucas distâncias entre si. Assim, k = 4.
+Para escolher um bom parâmetro k é necessário observa os agrupamento e determinar o melhor conjunto. Como mostrado abaixo, o melhor conjunto é o quando K = 3, pois os três agrupamentos estão próximos em relação ao eixo y.
 
 ```{r}
     plot(emendas.area2.hclust, hang = -1, labels = FALSE)
-    rect.hclust(emendas.area2.hclust, k = 4)
+    rect.hclust(emendas.area2.hclust, k = 3)
 
 ```
 
-Após os dados estarem agrupados, basta plotar o gráfico. 
+Algumas visualizações dos dados dois à dois. 
 
 ```{r}
-  emendas.area.agrup = cutree(emendas.area2.hclust, k = 3)
-  ggplot(emendas.area, aes(x = Agricultura, y = Ciência.e.Tecnologia)) +
-     geom_point(aes(color = factor(emendas.area.agrup), alpha = 0.1))
+ # ggpairs(select(emendas.area,c(2:4)))
+ # ggpairs está apresentando erro ao criar o documento   
 ```
 
 
+##III. Qual a qualidade do agrupamento final encontrado?
 
+O gráfico de silhueta foi proposto para avaliar particionamentos. Onde cada observação é representado por um valor s(xi) chamado de silhueta que é baseado na comparação da "consistência" e na "separação" em um único gráfico. 
 
-#LIXO?
+O ideal é todas as barras do gráfico fique a direita, pois, é um indicador que os grupos estão bem relacionados. 
+
 ```{r}
-  emendas.area2 = emendas.area %>% select(Agricultura, Assistência.Social,Ciência.e.Tecnologia,Comércio.e.Serviços,
-                         Cultura,Defesa.Nacional, Desporto.e.Lazer, Direitos.da.Cidadania, 
-                         Gestão.Ambiental,Indústria, Organização.Agrária, Outros, Saneamento,
-                         Saúde, Segurança.Pública, Trabalho, Urbanismo) %>% dist() %>%
-              hclust(method = "ward.D2")
-
+  plot(silhouette(cutree(emendas.area2.hclust, k = 3), emendas.area2.dist))
 ```
+
+O valor da silhueta média é de 0.37 que segundo Rousseeuw, significa que a estrutura é fraca e pode ser superficial. É aconselhavél utilizar outros métodos para agrupar os dados. 
+
+
+##IV. Que conclusões é possível tirar destes dados? 
+
+É possível concluir que não há agrupamentos bem definidos, como é possível observar no gráfico de sulhueta. O gráfico PCA abaixo mostra a disposição dos deputados no que se refere a suas semelhanças nos recursos destinados das emandas. 
+
 
 ```{r}
   library(ggfortify)
@@ -204,7 +209,8 @@ Após os dados estarem agrupados, basta plotar o gráfico.
                          Cultura,Defesa.Nacional, Desporto.e.Lazer, Direitos.da.Cidadania, 
                          Gestão.Ambiental,Indústria, Organização.Agrária, Outros, Saneamento,
                          Saúde, Segurança.Pública, Trabalho, Urbanismo)
-  autoplot(prcomp(df))
+  autoplot(prcomp(df), data = emendas.area, colour = "NOME_PARLAMENTAR",loadings.colour = 'blue',
+         loadings.label = TRUE, loadings.label.size = 3, label = TRUE) +  theme(legend.position="none") 
 
 ```
 
