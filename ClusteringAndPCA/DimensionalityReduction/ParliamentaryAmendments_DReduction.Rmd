@@ -1,0 +1,142 @@
+---
+title: "Uma análise sobre as Emendas Parlamentares"
+author: "Arthur Sampaio"
+date: "19 de agosto de 2016"
+output:
+  html_document:
+    theme: yeti
+    toc: true
+    toc_float: true
+    fig_width: 10
+    fig_height: 5
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  theme_set(theme_bw())
+```
+
+#Resumo
+
+Neste relatório analisei informações sobre verbas alocadas por parlamentar brasileiro para entidades através das Emendas Parlamentares na atual legislatura que começou em 2015. Todos os dados utilizados estão disponíveis na Transparência da Câmara Federal. A análise presente neste relatório foi feita em Linguagem R com o auxilio do RMarkdown para gerar este documento.
+
+#Os Dados
+
+Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no seu [GitHub](https://github.com/nazareno/ciencia-de-dados-1). Os arquivos contam com as descrições dos repasses através das emendas parlamentares por deputado e por área distribuidas em mais de vinte (20) variáveis. 
+
+
+#Você sabe o que é Emenda Parlamentar? 
+
+Segundo a nossa Constituição, a emenda parlamentar é o mecanismo que o Congresso Nacional possui para participar da elaboração do orçamento anual da União. Através das emendas os parlamentares procuram aperfeiçoar a proposta encaminhada pelo Poder Executivo, visando uma melhor alocação dos recursos públicos. 
+
+####Trocando em miúdos... Entenda como funciona a emenda parlamentar?
+
+O vereador solicita que uma emenda parlmentar seja incluída no orçamento da União para determinado fim. O Deputado elabora o pedido de emenda e envia ao Executivo que irá avaliar se a emenda será aprovada ou não. Sempre que uma emenda é aprovada o Prefeito do município é notificado que a verba já está disponível. Cada Parlamentar Federal, desde 2015, passou a ter R$15 milhões anuais para atender aos pedidos de emenda no Orçamento Anual. 
+
+#A análise 
+
+Neste relatóri seroá analisados como os parlamentares nordestinos destinam o seus recursos das emendas parlamentares para as áreas de Assistência Social, Cultura, Desporto e Lazer, Direitos da Cidadania e Gestão Ambiental.
+
+##Preparando os dados
+
+Os dados que irei utilizar são referentes ao gasto total por área de cada Deputado e a descrição de cada Emenda Parlamentar nos últimos três anos. 
+
+Para isto irei filtrar o arquivo com os detalhes da emenda parlamentar apenas para parlamentares nordestinos e o período compreendido entre 2015 e 2016. Também é importante informar que  para não alterar os dados foram retirados do dataset as informações referentes a Bancadas e Comissões Parlamantares.
+
+```{r, echo=FALSE}
+#lendo os dados
+emendas.detalhes <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/ClusteringAndPCA/data/emendas_detalhes_parlamentar.csv")
+
+#filtrando para os anos da legislatura e o Estado da Paraíba. 
+
+emendas.detalhes <- emendas.detalhes %>% filter(UF_PROPONENTE %in% c("PB","PE","RN","AL", "BA","MA","PI","SE","CE"), ANO_PROP >= 2015, TIPO_PARLAMENTAR == "INDIVIDUAL")
+
+```
+
+```{r, echo=FALSE}
+#lendo os dados 
+ emendas.area <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/ClusteringAndPCA/data/emendas_area_parlamentar.csv")
+
+#criando um novo dataframe com o nome dos parlamentares nordestinos para posteriormente filtrá-los do dataframe acima. 
+#somei os valores das emendas para poder agrupar os nomes dos parlamentares corretamente
+parlamentares = emendas.detalhes %>% group_by(NOME_PARLAMENTAR) %>% summarise(total = sum(VL_REPASSE_PROP))
+
+#filtrando em emendas.area os nomes do parlamentares
+
+emendas.area = emendas.area %>% filter(NOME_PARLAMENTAR %in% parlamentares$NOME_PARLAMENTAR)
+
+
+
+```
+
+##Conhecendo os Dados
+
+Vamos ver como se comportam os gastos totais dos deputados por área. 
+
+```{r  echo=FALSE}
+inputPanel(
+  selectInput("areas", label = "Áreas Contempladas:",
+              choices = c("Agricultura","Assistência.Social","Ciência.e.Tecnologia",
+                          "Comércio.e.Serviços"), selected = 20)
+)
+
+
+
+
+```
+
+
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+```{r eruptions, echo=FALSE}
+inputPanel(
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+),
+
+renderPlot({
+  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
+       xlab = "Duration (minutes)", main = "Geyser eruption duration")
+  
+  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
+  lines(dens, col = "blue")
+}),
+```
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+
