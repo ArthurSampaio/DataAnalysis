@@ -1,0 +1,145 @@
+---
+title: "Emendas Parlamentares - Uma análise dos gastos"
+author: "Arthur Sampaio"
+date: "26 de agosto de 2016"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 10
+    theme: yeti
+    toc: yes
+    toc_float: yes
+
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  theme_set(theme_bw())
+```
+
+
+#Resumo
+
+Neste relatório analisei informações sobre verbas alocadas por parlamentar nordestino para entidades através das Emendas Parlamentares na atual legislatura que começou em 2015. Todos os dados utilizados estão disponíveis na Transparência da Câmara Federal. A análise presente neste relatório foi feita em Linguagem R com o auxilio do RMarkdown para gerar este documento.
+
+#Os Dados
+
+Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para _csv_ (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no seu [GitHub](https://github.com/nazareno/ciencia-de-dados-1). Os arquivos contam com as descrições dos repasses através das emendas parlamentares por deputado e por repasse distribuidas em mais de vinte (20) variáveis. 
+
+
+#Você sabe o que é Emenda Parlamentar? 
+
+Segundo a nossa Constituição, a emenda parlamentar é o mecanismo que o Congresso Nacional possui para participar da elaboração do orçamento anual da União. Através das emendas os parlamentares procuram aperfeiçoar a proposta encaminhada pelo Poder Executivo, visando uma melhor alocação dos recursos públicos. 
+
+####Trocando em miúdos... Entenda como funciona a emenda parlamentar?
+
+O vereador solicita que uma emenda parlmentar seja incluída no orçamento da União para determinado fim. O Deputado elabora o pedido de emenda e envia ao Executivo que irá avaliar se a emenda será aprovada ou não. Sempre que uma emenda é aprovada o Prefeito do município é notificado que a verba já está disponível. Cada Parlamentar Federal, desde 2015, passou a ter R$15 milhões anuais para atender aos pedidos de emenda no Orçamento Anual. 
+
+#Preparando os dados
+
+Os dados que serão utilizados são referentes ao gasto total por área de cada Deputado e a descrição de cada Emenda Parlamentar nos últimos três anos. 
+
+Para isto irei filtrar o arquivo com os detalhes da emenda parlamentar apenas para os anos de 2015 e 2016 e para os deputados da paraíba. Como meu objetivo é estudar os deputados federais, tirei do dataset os objetos compreendidos para os senadores da república.
+
+
+```{r}
+  #Importando os arquivos com todos os dados. 
+
+  #Dataset com os gastos por área de cada parlamentar
+  emendas.area.nordeste <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/ClusteringAndPCA/data/emendas_area_parlamentar.csv")
+  #DataSet com os gastos detalhados de gada emenda parlamentar
+  emendas.detalhes <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/ClusteringAndPCA/data/emendas_detalhes_parlamentar.csv")
+  # E em seguida fazendo as modificações necessárias no dataset
+  emendas.detalhes = emendas.detalhes %>% filter(UF_PROPONENTE %in% c("PB", "PE", "RN", "AL", "BA", "SE", "MA", "PI", "CE"),  TIPO_PARLAMENTAR == "INDIVIDUAL", ANO_PROP >= 2015)
+  parlamentares.nordeste = emendas.detalhes %>% group_by(NOME_PARLAMENTAR) %>% summarise(total = sum(VL_REPASSE_PROP))
+  
+  emendas.area.nordeste = emendas.area.nordeste %>% filter(NOME_PARLAMENTAR %in% parlamentares.nordeste$NOME_PARLAMENTAR)
+
+```
+
+O DataFrame que irei utilizar possui os dados referentes aos gastos por área de 231 Parlamentares Nordestinos para a legislatura federal que começou no ano de 2015. Após filtrar e cruzar os dados para obtermos informações apenas dos parlamentares nordestinos vamos ao que realmente interessa.
+
+
+#A Análise
+
+Nesta etapa da jornada na Disciplina de Análise da Dados I, vamos investigar como se comporta os gastos dos deputados com as áreas envolvidas de bem-estar social, além de agrupá-los em conjuntos de semelhanças dos seus gastos. 
+
+As áreas que julgo relacionados com o bem-estar social são: Assistência Social, Ciência e Tecnologia, Cultura, Desporto e Lazer, Direitos da Cidadania e Saúde, e são as mesma que irei analisar neste pequeno relatório. 
+
+```{r}
+  
+emendas.area.nordeste = emendas.area.nordeste %>% select(NOME_PARLAMENTAR, Assistência.Social,Ciência.e.Tecnologia,Cultura, Desporto.e.Lazer, Direitos.da.Cidadania, Saúde)
+
+```
+
+
+##Conhecendo os nossos dados
+
+```{r}
+
+
+```
+
+
+
+
+
+
+
+This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+## Inputs and Outputs
+
+You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
+
+```{r eruptions, echo=FALSE}
+inputPanel(
+  selectInput("n_breaks", label = "Number of bins:",
+              choices = c(10, 20, 35, 50), selected = 20),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 0.2, max = 2, value = 1, step = 0.2)
+)
+
+renderPlot({
+  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
+       xlab = "Duration (minutes)", main = "Geyser eruption duration")
+  
+  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
+  lines(dens, col = "blue")
+})
+```
+
+## Embedded Application
+
+It's also possible to embed an entire Shiny application within an R Markdown document using the `shinyAppDir` function. This example embeds a Shiny application located in another directory:
+
+```{r tabsets, echo=FALSE}
+shinyAppDir(
+  system.file("examples/06_tabsets", package = "shiny"),
+  options = list(
+    width = "100%", height = 550
+  )
+)
+```
+
+Note the use of the `height` parameter to determine how much vertical space the embedded application should occupy.
+
+You can also use the `shinyApp` function to define an application inline rather then in an external directory.
+
+In all of R code chunks above the `echo = FALSE` attribute is used. This is to prevent the R code within the chunk from rendering in the document alongside the Shiny components.
+
+
+

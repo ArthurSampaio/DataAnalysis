@@ -1,14 +1,16 @@
 ---
--title: "Análise das Emendas Parlamentares"
+-title: Análise das Emendas Parlamentares
 author: "Arthur Sampaio"
 date: "14 de agosto de 2016"
 output:
+  pdf_document:
+    toc: yes
   html_document:
-    theme: yeti
-    toc: true
-    toc_float: true
-    fig_width: 10
     fig_height: 5
+    fig_width: 10
+    theme: yeti
+    toc: yes
+    toc_float: yes
 ---
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
