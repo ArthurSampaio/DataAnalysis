@@ -1,0 +1,188 @@
+---
+title: "Emendas Parlamentares - Uma análise dos gastos"
+date: "26 de agosto de 2016"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 10
+    theme: yeti
+    toc: yes
+    toc_float: yes
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  require(GGally)
+  library(ggdendro)
+  library(knitr)
+  
+  theme_set(theme_bw())
+```
+
+
+#Resumo
+
+Neste relatório analisei informações sobre verbas alocadas por parlamentar nordestino para entidades através das Emendas Parlamentares na atual legislatura que começou em 2015. Todos os dados utilizados estão disponíveis na Transparência da Câmara Federal. A análise presente neste relatório foi feita em Linguagem R com o auxilio do RMarkdown para gerar este documento.
+
+#Os Dados
+
+Os dados disponíveis no site da Transparência da Câmara Federal são em formato XML. A conversão para csv (comma-separated value) foi feita pelo professor Nazareno e disponibilizado no seu [GitHub](https://github.com/nazareno/ciencia-de-dados-1). Os arquivos contam com as descrições dos repasses através das emendas parlamentares por deputado e por repasse distribuidas em mais de vinte (20) variáveis.
+
+
+#Você sabe o que é Emenda Parlamentar? 
+
+Segundo a nossa Constituição, a emenda parlamentar é o mecanismo que o Congresso Nacional possui para participar da elaboração do orçamento anual da União. Através das emendas os parlamentares procuram aperfeiçoar a proposta encaminhada pelo Poder Executivo, visando uma melhor alocação dos recursos públicos.
+
+
+####Trocando em miúdos... Entenda como funciona a emenda parlamentar?
+
+O vereador solicita que uma emenda parlmentar seja incluída no orçamento da União para determinado fim. O Deputado elabora o pedido de emenda e envia ao Executivo que irá avaliar se a emenda será aprovada ou não. Sempre que uma emenda é aprovada o Prefeito do município é notificado que a verba já está disponível. Cada Parlamentar Federal, desde 2015, passou a ter R$15 milhões anuais para atender aos pedidos de emenda no Orçamento Anual.
+
+#Preparando os dados
+
+Os dados que serão utilizados são referentes ao gasto total por área de cada Deputado e a descrição de cada Emenda Parlamentar nos últimos três anos.
+
+Para isto irei filtrar o arquivo com os detalhes da emenda parlamentar apenas para os anos de 2015 e 2016 e para os deputados da paraíba. Como meu objetivo é estudar os deputados federais, tirei do dataset os objetos compreendidos para os senadores da república.
+
+```{r}
+  #Importando os arquivos com todos os dados. 
+
+  #Dataset com os gastos por Ã¡rea de cada parlamentar
+  emendas.area.nordeste <- read.csv("C:/Users/Sarah/arthur/DataAnalysis/ClusteringAndPCA/data/emendas_area_parlamentar.csv",  encoding = "UTF-8")
+  #DataSet com os gastos detalhados de gada emenda parlamentar
+  emendas.detalhes <- read.csv("C:/Users/Sarah/arthur/DataAnalysis/ClusteringAndPCA/data/emendas_detalhes_parlamentar.csv",  encoding = "UTF-8")
+  # E em seguida fazendo as modificaÃ§Ãµes necessÃ¡rias no dataset
+  emendas.detalhes = emendas.detalhes %>% filter(UF_PROPONENTE %in% c("PB", "PE", "RN", "AL", "BA", "SE", "MA", "PI", "CE"),  TIPO_PARLAMENTAR == "INDIVIDUAL", ANO_PROP >= 2015)
+  
+  parlamentares.nordeste = emendas.detalhes %>% group_by(NOME_PARLAMENTAR) %>% summarise(total = sum(VL_REPASSE_PROP))
+  
+  emendas.area.nordeste = emendas.area.nordeste %>% filter(NOME_PARLAMENTAR %in% parlamentares.nordeste$NOME_PARLAMENTAR)
+
+```
+
+```{r}
+  emendas.detalhes = emendas.detalhes %>% select(NOME_PARLAMENTAR, UF_PROPONENTE)
+  emendas.detalhes <- emendas.detalhes[!duplicated(emendas.detalhes), ]
+  
+```
+
+
+O DataFrame que irei utilizar possui os dados referentes aos gastos por área de 231 Parlamentares Nordestinos para a legislatura federal que começou no ano de 2015. Após filtrar e cruzar os dados para obtermos informações apenas dos parlamentares nordestinos vamos ao que realmente interessa.
+
+
+
+#A Análise
+
+Nesta etapa da jornada na Disciplina de Análise da Dados I, vamos investigar como se comporta os gastos dos deputados com as áreas envolvidas de saneamento, gestão ambiental, saúde e urbanismo, além de agrupá-los em conjuntos de semelhanças dos seus gastos.
+
+
+```{r}
+  
+emendas.area.nordeste = emendas.area.nordeste %>% 
+  select(NOME_PARLAMENTAR, Gestão.Ambiental, Saneamento, Saúde, Urbanismo)
+
+```
+
+
+##Conhecendo os nossos dados
+
+```{r}
+  #Colocando os valores em mil reais
+  emendas.area.nordeste1 = (emendas.area.nordeste[, 2:5]/1e3)
+  emendas.area.nordeste1$NOME_PARLAMENTAR <- emendas.area.nordeste$NOME_PARLAMENTAR
+
+
+```
+
+
+```{r fig.height=10}
+
+  ggpairs(select(emendas.area.nordeste1, - NOME_PARLAMENTAR), labels = F)
+
+```
+
+É possível observar que as variáveis de Saneamento e Urbanismo estão formente correlacionadas (Correlação: 0.927) o que podemos implicar que os gastos entre Saneamento e Urbanismo são quase proporcionais. Contudo os os demais valores estão bastante assimétrico e  concentrados a esquerda do gráfico para facilitar a visualização irei colocar os dados numa base logarítimica para facilitar na visualização. 
+
+```{r}
+ emendas.area.nordeste1 = log(emendas.area.nordeste1[, 1:4]+1)
+ emendas.area.nordeste1$NOME_PARLAMENTAR <- emendas.area.nordeste$NOME_PARLAMENTAR
+ ggpairs(select(emendas.area.nordeste1, - NOME_PARLAMENTAR), labels = F)
+
+```
+
+Ainda há uma forte relação entre Urbanismo e Sanemamento o que é um forte indicador que ambas as variáveis possuem um comportamento bastante semelhante. As varuaveus de Saúde e urbanismo possuem uma correlação interessante, do valor de 0,302, é possível observar que há muitos valores onde o investimento na Saúde é de 0 R$ o que pode alterar o valor da correlação entres essas variáveis. 
+
+##Principal Component Analysis - PCA
+
+O PCA é um procedimento matemático que utiliza transformações lineares para converter um conjunto de dados de várias variáveis posivelemnte correlacionado a um conjunto de variáveis linearmente descorrelacionadas. O número de componentes principais é menor ou igual ao número de variáveis originais - daí o porquê de ser uma técnica de redução de dimensionalidade. O PCA também é conhecido como transformada de Karhunen-Loeve Discreta.
+
+```{r}
+
+  pr.out = prcomp(select(emendas.area.nordeste1, -NOME_PARLAMENTAR), scale = T)
+  kable(pr.out$rotation)
+
+```
+
+###Analisando o Gráfico da Variância Cumulativa
+
+```{r}
+
+ plot_pve <- function(prout){
+  pr.var <- pr.out$sdev^2
+  pve <- pr.var / sum(pr.var)
+  df = data.frame(x = 1:NROW(pve), y = cumsum(pve))
+  ggplot(df, aes(x = x, y = y)) + 
+    geom_point(size = 3) + 
+    geom_line() + 
+    labs(x='Principal Component', y = 'Cumuative Proportion of Variance Explained')
+}
+
+plot_pve(pr.out)
+
+```
+
+É possível notar que a variação da variância entre PC1 e PC2 é de cerca de 0.3 unidades de variância, enquanto o PC3 e PC4 são aproxidamente iguais. 
+
+##T-SNE
+
+T-Distributed Stochastis Neighbor Embedding (T-SNE) é uma nova técnica de redução de dimensionalidade que é particularmente bem adaptada para a visualização de um grande conjunto de dados com n-dimensões. A técnica pode ser aplicada através de aproximações e tem bastante aplicabilidade no mundo real. 
+
+```{r}
+  library(Rtsne)
+
+ # emendas.area.nordeste1 <- emendas.area.nordeste1[!duplicated(emendas.area.nordeste1), ]
+
+  #tsne.out = Rtsne(select(emendas.area.nordeste1, - NOME_PARLAMENTAR), pca = TRUE, verbose = TRUE)
+
+```
+
+Infelizmente, ao aplicar o T-SNE me deparei com um problema com erro de dados duplicados e não consegui resolver este problema. 
+
+
+#Concluindo
+
+Para encerrar, vamos agrupar os deputados que mais se assemelham nestas quatro áreas. 
+```{r}
+  
+  emendas.area.nordeste1 = left_join(emendas.area.nordeste1, emendas.detalhes, by = "NOME_PARLAMENTAR")
+
+```
+
+
+Após se deparar com o erro ao gerar o T-SNE só me sobra analisar o conjunto de dados com base no PCA, logo: 
+
+```{r eruptions, echo=FALSE}
+
+  autoplot(pr.out, data = emendas.area.nordeste1, loadings = TRUE, loadings.label = TRUE, colour = 'UF_PROPONENTE', labels = FALSE) +   theme(legend.position="none")
+```
+
