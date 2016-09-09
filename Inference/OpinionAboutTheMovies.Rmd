@@ -1,0 +1,76 @@
+---
+title: "Opiniões Sobre os Filmes"
+author: "Arthur Sampaio"
+date: "9 de setembro de 2016"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 10
+    theme: yeti
+    toc: yes
+    toc_float: yes
+
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  require(GGally)
+  library(ggdendro)
+  library(knitr)
+  library(resample)
+
+  
+  theme_set(theme_bw())
+```
+
+
+#Resumo 
+
+Neste pequeno relatório utilizei dados coletados por um sistema de recomendação, o [MovieLens](http://movielens.org), sobre as avaliações de usuários sobre um conjunto de filmes. Tenho o objetivo de responder duas perguntas sugeridas utilizando os conhecimentos adquiridos na jornada de Análise de Dados. A análise foi feita na linguagem R com o auxilio de diversas bibliotecas com o auxilio do RMarkdown para gerar este documento
+
+
+#Conhecendo os dados
+
+Serão estudados os dados coletados pelo [MovieLens](http://movielens.org) sobre avaliações de um catálogo de mais de 10 mil filmes. Os dados foram criados por 668 usuários durante 03 de Abril de 1996 e 09 de Janeiro de 2016. Os dados, distribuidos em quatro datasets, constituem cerca de 10 variáveis com informações de desde o título até as notas obtidas por cada um dos usuários. 
+
+Para começar, vamos carregar os nossos dados. 
+
+```{r}
+movies <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/movies.csv", col_types = list(.default = col_character()))
+
+ratings <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/ratings.csv")
+
+tags <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/tags.csv")
+```
+
+
+# A análise
+
+Para guiar o curso deste relatório irei responder duas questões.
+
+##1. Escolha uma n-logia e avalie para qual dos episódios da n-logia há melhor avaliação e para qual há mais variação nas notas atribuídas ao filme.
+
+Como uma criança dos anos 2000 a triologia escolhida foi [Lord of the Rings](http://www.lordoftherings.net/), pois tive momentos memoráveis nas frentes das telas em decorrência desta grande triologia, originalmente escrita pelo grande mestre da fantasia, JRR Tolkien.
+
+### Preparando os dados
+
+
+
+
+
+
+
+
+
+
+
