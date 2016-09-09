@@ -46,11 +46,11 @@ Serão estudados os dados coletados pelo [MovieLens](http://movielens.org) sobre
 Para começar, vamos carregar os nossos dados. 
 
 ```{r}
-movies <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/movies.csv", col_types = list(.default = col_character()))
+movies <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/movies.csv")
 
-ratings <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/ratings.csv")
+ratings <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/ratings.csv")
 
-tags <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/tags.csv")
+tags <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/tags.csv")
 ```
 
 
@@ -64,6 +64,32 @@ Como uma criança dos anos 2000 a triologia escolhida foi [Lord of the Rings](ht
 
 ### Preparando os dados
 
+Antes de responder propriamente a questão, irei preparar os dados e fazer uma análise inicial de como se comportam. Para isto irei separar em pequenos datasets os dados referentes as avaliações para os filmes da Triologia do Anel. 
+
+```{r}
+
+#após pesquisar manualmente, encontrei o id dos três filmes da triologia
+filmes.ID = c(4993, 5952, 7153)
+
+#filmes analisados
+movies.analyzed = movies %>% filter(movies$movieId %in% filmes.ID)
+
+#raking dos filmes analizados
+ratings.analyzed = ratings %>% filter(ratings$movieId %in% movies.analyzed$movieId)
+
+#todos os dados condensados da triologia
+data.analyzed = left_join(ratings.analyzed, movies.analyzed, by="movieId")
+
+```
+
+Conhecendo um pouco dos dados
+
+```{r fig_width: 13}
+
+plot <- ggplot(data.analyzed, mapping = aes(x = ratings.analyzed$rating)) +
+  geom_histogram(aes(text = paste("Nota: ", rating)), bins = 10) + xlab("Notas recebidas dos filmes") + ylab("") + facet_grid( ~title)
+  (gg <- ggplotly(plot)) 
+```
 
 
 
