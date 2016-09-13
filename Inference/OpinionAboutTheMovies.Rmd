@@ -56,11 +56,11 @@ tags <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small
 
 Para guiar o curso deste relatório irei responder duas questões.
 
-##1. Escolha uma n-logia e avalie para qual dos episódios da n-logia há melhor avaliação e para qual há mais variação nas notas atribuídas ao filme.
+#1. Escolha uma n-logia e avalie para qual dos episódios da n-logia há melhor avaliação e para qual há mais variação nas notas atribuídas ao filme.
 
 Como uma criança dos anos 2000 a triologia escolhida foi [Lord of the Rings](http://www.lordoftherings.net/), pois tive momentos memoráveis nas frentes das telas em decorrência desta grande triologia, originalmente escrita pelo grande mestre da fantasia, JRR Tolkien.
 
-#### Preparando os dados
+### Preparando os dados
 
 Antes de responder propriamente a questão, irei preparar os dados e fazer uma análise inicial de como se comportam. Para isto irei separar em pequenos datasets os dados referentes as avaliações para os filmes da Triologia do Anel. 
 
@@ -98,7 +98,7 @@ data.analyzed$title <- as.character(data.analyzed$title)
 ```
 
 
-####Conhecendo um pouco dos dados
+###Conhecendo um pouco dos dados
 
 Como é possível notar no histograma abaixo, as notas dos três filmes da triologia, em geral, são bem avaliadas, como é evidente na alta concentração de valores no lado direito da visualização. 
 
@@ -108,16 +108,50 @@ plot <- ggplot(data.analyzed, mapping = aes(x = rating)) +
   (gg <- ggplotly(plot)) 
 ```
 
-### Qual o filme mais bem avaliado?
+É notório -- no histograma acima -- que o filme o terceiro filme da saga, __The Return of the King__, foi o que recebeu a maior quantidade de avaliações positivas, contudo será que ele foi o mais bem avaliado? 
 
-Para determinar qual é o filme mais avaliado, irei inferir através de técnicas de bootstrap qual dos filmes tem a maior média, com um intervalo de 95% de confiança. 
+## Respondendo a questão
+
+Para responder tal questão irei utilizar técnicas de inferência, como bootstrap, para criar um panorama onde nossas conclusões tenham cerca de 95% de confiança. 
+
+A técnica de boostrap pode ser de vital importância para levantar dados estáticos de uma população a partir de alguma(s) de suas amostras. O algorítimo é bastante simples:
+  1. Reescreve um conjunto de dados do mesmo tamanho da amostra original n vezes. 
+  2. Calcula a estatísca para cada amostra gerada;
+  3. Encontra o desvio padrão desta estatística;
+  
+Para esta análise a estatística usada sera a média, pois, com ela é possível calcular qual o ponto onde se encontra a maior frequência de valores. Além disto, como as notas das avaliações variam num intervalor [0,5] não teremos problemas com outliers, aumentando assim a confiabilidade da técnica nesta amostra. 
+
+Abaixo eu realizo o procedimento computacional descrito acima. 
+
+```{r}
+
+#Fazendo as diversas médias das subpopulações dos dados através da técnica de boostrap
+
+b = data.analyzed %>% filter(title == "The Fellowship of the Ring, The (2001)") %>% bootstrap(mean(rating), R = 10000)
+meansFellowship = CI.percentile(b, probs = c(.025, .975))
+
+b = data.analyzed %>% filter(title == "The Two Towers, The (2002)") %>% bootstrap(mean(rating), R = 10000)
+meansTowers = CI.percentile(b, probs = c(.025, .975))
+
+b = data.analyzed %>% filter(title == "The Return of the King, The (2003)") %>% bootstrap(mean(rating), R = 10000)
+meansReturn = CI.percentile(b, probs = c(.025, .975))
+
+#criando um novo dataframe com os dados das médias 
+df = data.frame(rbind(meansFellowship, meansTowers, meansReturn))
+df$title = c("The Fellowship of the Ring, The (2001)", "The Two Towers, The (2002)","The Return of the King, The (2003)")
+rownames(df) <- c("The Fellowship of the Ring, The (2001)", "The Two Towers, The (2002)","The Return of the King, The (2003)")
+
+df %>% ggplot(aes(x = title, ymin = X2.5., ymax = X97.5.)) +
+  geom_errorbar(width = .2) + labs(title = "Média das avaliações dos Espectadores", x = "Filmes", y = "Média")
+
+```
 
 
+Acima está o gráfico de barras de erros para a avaliação geral dos telespectadores nos três filmes. Não é necessário muitas explicações para compreender que, com 95% de confiabilidade, __não há um filme mais avaliado entre os três__. 
 
+Para ler o resultado do gráfico, basta perceber que as barras possuem entre si uma interseccção maior que 25% do comprimento total das barras ocasionando que não há uma diferença estatisticamente significante entre os filmes. 
 
-
-É notório -- no histograma acima -- que o filme o terceiro filme da saga, __The Return of the King__, foi o que recebeu a maior quantidade de avaliações positivas, contudo será que ele foi o mais bem avaliado? Para isto, basta calcular a média das avaliações 
-
+Tal fato só ocorreria se as médias da amostra tivessem um valor bem próximo entre si. Para verificar isso, calculei as médias para cada filme e gerei um gráfico de barras para ajudar na visualização. 
 
 ```{r, echo=FALSE}
 dado = data.analyzed %>% group_by(title) %>% summarise(media = mean(rating))
@@ -130,15 +164,21 @@ plotMeanRating <- ggplot(dado, mapping = aes(x = title, y = media, fill = title)
 
 ```
 
+Há variação encontrada na média das avaliações dos três filmes é da ordem de 0.02. Assim, é possível afirmar que o bootstrap utilizado acima está correto e corroborando com o resultado encontrado. 
 
-Mesmo com uma diferença na ordem dos décimos, o filme melhor avalido é o __The Fellowship of the Ring__ (média de 4.13), o contrário do esperado, que seria o filme que possui a maior quantidade de avaliações, _The Return of the King_. 
+Além disto, através do mesmo pensamento é possível concluir a segunta questão da pergunta: _Para qual há mais variação nas notas atribuídas ao filme?_
 
-
-
-
-
+Para responder tal questão, basta encontrar qual dos filmes tem o maior comprimento da barra de erro no gráfico acima. Com um pouco de atenção é possível perceber que a maior barra é para o filme _The Fellowship of the Ring_. Logo, este é o filme que possui a maior variação nas notas. 
 
 
+###Resumindo
+
+Para a Triologia do The Lord of The Rings, é possível concluir com 95% de confiabilidade, que não há um filme que tenha uma maior avaliação do público. Contudo é possível afirmar que The Fellowship of the Rings possue a maior variação significativa nas notas dadas pelos usuários. 
+
+
+
+
+# Existe uma relação entre em quantos gêneros os filmes se encaixam e a avaliação que os filmes recebem?
 
 
 
