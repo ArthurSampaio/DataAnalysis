@@ -56,7 +56,7 @@ tags <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small
 
 Para guiar o curso deste relatório irei responder duas questões.
 
-#1. Escolha uma n-logia e avalie para qual dos episódios da n-logia há melhor avaliação e para qual há mais variação nas notas atribuídas ao filme.
+#Escolha uma n-logia e avalie para qual dos episódios da n-logia há melhor avaliação e para qual há mais variação nas notas atribuídas ao filme.
 
 Como uma criança dos anos 2000 a triologia escolhida foi [Lord of the Rings](http://www.lordoftherings.net/), pois tive momentos memoráveis nas frentes das telas em decorrência desta grande triologia, originalmente escrita pelo grande mestre da fantasia, JRR Tolkien.
 
