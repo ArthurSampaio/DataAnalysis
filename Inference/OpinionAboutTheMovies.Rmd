@@ -44,11 +44,13 @@ Serão estudados os dados coletados pelo [MovieLens](http://movielens.org) sobre
 Para começar, vamos carregar os nossos dados. 
 
 ```{r}
-movies <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/movie-genre.csv")
+movies <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/movie-genre.csv")
 
-ratings <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/ratings.csv")
+moviesTitle <-read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/movies.csv")
 
-tags <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/tags.csv")
+ratings <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/ratings.csv")
+
+tags <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/tags.csv")
 ```
 
 
@@ -176,9 +178,91 @@ Para responder tal questão, basta encontrar qual dos filmes tem o maior comprim
 Para a Triologia do The Lord of The Rings, é possível concluir com 95% de confiabilidade, que não há um filme que tenha uma maior avaliação do público. Contudo é possível afirmar que The Fellowship of the Rings possue a maior variação significativa nas notas dadas pelos usuários. 
 
 
-
-
 # Existe uma relação entre em quantos gêneros os filmes se encaixam e a avaliação que os filmes recebem?
+
+Para receber tal questão, irei escolher 150 filmes aleatórios do dataset dos filmes analisados para apartir desta amostra levantar informações sobre toda a população de filmes. Dado o objetivo de determinar se a quantidade de generos está relacionado com a nota, a estatística utilizada nesta análise sera a média, pois, com ela é possível calcular qual o ponto onde se encontra a maior frequência de valores.
+
+```{r}
+#dataset com as informaçõs dos 150 filmes escolhidos aleatoriamente
+set.seed(150)
+experimento = sample_n(moviesTitle, 150)
+
+#filtra os filmes encontrados nos datasets que serão utilizados
+movie.used = movies %>% filter(movies$title %in% experimento$title)
+rating.used = ratings %>% filter(ratings$movieId %in% experimento$movieId)
+#encontra a quantidade de generos de cada filme
+movie.qtdGenre = movie.used %>% count(title)
+names(movie.qtdGenre) <- c("title", "qtdGenre")
+
+#calculando a média das avaliações de cada filme dentro da amostra inicial 
+rating.used = rating.used %>% group_by(movieId) %>% summarise(media = mean(rating))
+
+#retirando os gêneros dos filmes e as duplicatas
+movie.used = movie.used %>% select(-genre)
+movie.used <- movie.used[!duplicated(movie.used), ]
+
+
+#condensando os dados entre os filmes e a quantidade de gênero e os filmes e seus gêneros
+moviesAll = left_join(movie.qtdGenre, movie.used, by = "title")
+
+#agora, condensando os dados dos filmes com suas respectivas notas 
+
+moviesAll = left_join(moviesAll, rating.used, by = "movieId")
+
+```
+
+
+Após organizar os dados, irei utilizar técnicas de inferência, como o bootstrap, para que todas as informações levantadas através dessa amostra possa ser ter 95% de confiabilidade em toda a população de filmes. 
+
+```{r}
+
+b = moviesAll %>% filter(qtdGenre == 1) %>% bootstrap(mean(media), R = 10000)
+means1 = CI.percentile(b, probs = c(.025, .975))
+
+b = moviesAll %>% filter(qtdGenre == 2) %>% bootstrap(mean(media), R = 10000)
+means2 = CI.percentile(b, probs = c(.025, .975))
+
+b = moviesAll %>% filter(qtdGenre == 3) %>% bootstrap(mean(media), R = 10000)
+means3 = CI.percentile(b, probs = c(.025, .975))
+
+b = moviesAll %>% filter(qtdGenre == 4) %>% bootstrap(mean(media), R = 10000)
+means4 = CI.percentile(b, probs = c(.025, .975))
+
+b = moviesAll %>% filter(qtdGenre == 5) %>% bootstrap(mean(media), R = 10000)
+means5 = CI.percentile(b, probs = c(.025, .975))
+
+
+
+df = data.frame(rbind(means1, means2, means3, means4, means5))
+df$genero = c("Um","Dois", "Três", "Quatro", "Cinco")
+rownames(df) <- c("Um","Dois", "Três", "Quatro", "Cinco")
+
+
+
+df %>% ggplot(aes(x = reorder(genero, X2.5.), ymin = X2.5., ymax = X97.5.)) +
+  geom_errorbar(width = .2) + labs(title = "Média das avaliações dos espectadores com relação a quantidade de Gêneros", x = "Quantidade de Gêneros", y = "Média")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
