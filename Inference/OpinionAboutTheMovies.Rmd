@@ -5,8 +5,8 @@ date: "9 de setembro de 2016"
 output:
   html_document:
     fig_height: 5
-    fig_width: 10
-    theme: yeti
+    fig_width: 8
+    theme: readable
     toc: yes
     toc_float: yes
 
@@ -28,8 +28,6 @@ knitr::opts_chunk$set(echo = TRUE)
   library(ggdendro)
   library(knitr)
   library(resample)
-
-  
   theme_set(theme_bw())
 ```
 
@@ -46,7 +44,7 @@ Serão estudados os dados coletados pelo [MovieLens](http://movielens.org) sobre
 Para começar, vamos carregar os nossos dados. 
 
 ```{r}
-movies <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/movies.csv")
+movies <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/movie-genre.csv")
 
 ratings <- read.csv("~/Documentos/Graduation/DataAnalysis/Inference/ml-latest-small/ratings.csv")
 
@@ -62,7 +60,7 @@ Para guiar o curso deste relatório irei responder duas questões.
 
 Como uma criança dos anos 2000 a triologia escolhida foi [Lord of the Rings](http://www.lordoftherings.net/), pois tive momentos memoráveis nas frentes das telas em decorrência desta grande triologia, originalmente escrita pelo grande mestre da fantasia, JRR Tolkien.
 
-### Preparando os dados
+#### Preparando os dados
 
 Antes de responder propriamente a questão, irei preparar os dados e fazer uma análise inicial de como se comportam. Para isto irei separar em pequenos datasets os dados referentes as avaliações para os filmes da Triologia do Anel. 
 
@@ -82,14 +80,58 @@ data.analyzed = left_join(ratings.analyzed, movies.analyzed, by="movieId")
 
 ```
 
-Conhecendo um pouco dos dados
+```{r, echo=FALSE}
+#Renomeando o nome dos filmes para organizar no RMarkdown
 
-```{r fig_width: 13}
+data.analyzed$title <- ordered(data.analyzed$title, levels = c("Lord of the Rings: The Return of the King, The (2003)", 
+                               "Lord of the Rings: The Fellowship of the Ring, The (2001)",
+                               "Lord of the Rings: The Two Towers, The (2002)"), 
+                              
+                              c("The Return of the King, The (2003)", 
+                               "The Fellowship of the Ring, The (2001)",
+                               "The Two Towers, The (2002)"))
 
-plot <- ggplot(data.analyzed, mapping = aes(x = ratings.analyzed$rating)) +
+#Tranforamando o titulo em caractere
+
+data.analyzed$title <- as.character(data.analyzed$title)
+        
+```
+
+
+####Conhecendo um pouco dos dados
+
+Como é possível notar no histograma abaixo, as notas dos três filmes da triologia, em geral, são bem avaliadas, como é evidente na alta concentração de valores no lado direito da visualização. 
+
+```{r, echo=FALSE}
+plot <- ggplot(data.analyzed, mapping = aes(x = rating)) +
   geom_histogram(aes(text = paste("Nota: ", rating)), bins = 10) + xlab("Notas recebidas dos filmes") + ylab("") + facet_grid( ~title)
   (gg <- ggplotly(plot)) 
 ```
+
+### Qual o filme mais bem avaliado?
+
+Para determinar qual é o filme mais avaliado, irei inferir através de técnicas de bootstrap qual dos filmes tem a maior média, com um intervalo de 95% de confiança. 
+
+
+
+
+
+É notório -- no histograma acima -- que o filme o terceiro filme da saga, __The Return of the King__, foi o que recebeu a maior quantidade de avaliações positivas, contudo será que ele foi o mais bem avaliado? Para isto, basta calcular a média das avaliações 
+
+
+```{r, echo=FALSE}
+dado = data.analyzed %>% group_by(title) %>% summarise(media = mean(rating))
+
+
+plotMeanRating <- ggplot(dado, mapping = aes(x = title, y = media, fill = title)) + 
+  geom_bar(stat = "identity") + theme(legend.position="none") + labs(title = "Média das Avaliações", x = "Filmes", y ="Nota média")
+  (gg <- ggplotly(plotMeanRating))
+
+
+```
+
+
+Mesmo com uma diferença na ordem dos décimos, o filme melhor avalido é o __The Fellowship of the Ring__ (média de 4.13), o contrário do esperado, que seria o filme que possui a maior quantidade de avaliações, _The Return of the King_. 
 
 
 
