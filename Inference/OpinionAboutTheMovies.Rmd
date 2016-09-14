@@ -1,6 +1,6 @@
 ---
 title: "Opiniões Sobre os Filmes"
-author: "Arthur Sampaio"
+author: ""
 date: "9 de setembro de 2016"
 output:
   html_document:
@@ -244,6 +244,16 @@ df %>% ggplot(aes(x = reorder(genero, X2.5.), ymin = X2.5., ymax = X97.5.)) +
 
 ```
 
+Acima é possível observa o gráfico de erro de barras para cada filme com quantidades de gêneros variando de 1 até 5. 
+
+Em cada barra a um ponto no meio, indicando a média daquela variação para podermos compará-las entre si, no que diz respeito, a determinar qual é o tipo de filme (ou seja, quantidade de gêneros) que pode receber as melhores notas. 
+
+
+```{r}
+
+#Os dois ultimos parágrafos foram feitos "nas coxas" pois tive que sair da universidade mais cedo e não deu tempo de concluir. O computador que tenho acesso não consegue instalar o R e o RStudio para eu poder concluir a atividade ): (fiz essa anotação no txt =D )
+
+```
 
 
 
