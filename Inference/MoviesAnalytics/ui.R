@@ -21,8 +21,8 @@ shinyUI(fluidPage(
   h2("Resumo"),
   p("Neste pequeno relatório utilizei dados coletados por um sistema de recomendação, o ", tags$a(href="http://movielens.org", "MovieLens")," 
     sobre as avaliações de usuários sobre um conjunto de filmes. Tenho o objetivo de responder duas perguntas sugeridas utilizando 
-    os conhecimentos adquiridos na jornada de Análise de Dados. A análise foi feita na linguagem R com o auxilio de diversas bibliotecas 
-    com o auxilio do RMarkdown para gerar este documento", align = "justify"),
+    os conhecimentos adquiridos na jornada de Análise de Dados. A análise foi feita na linguagem R com o auxilio de tecnologias web para confeccionar
+    esta página.", align = "justify"),
   
   
   h2("Os dados"),

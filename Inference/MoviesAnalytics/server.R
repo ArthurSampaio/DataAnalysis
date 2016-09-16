@@ -19,8 +19,15 @@ library(resample)
 theme_set(theme_bw())
 
 
-#Carregando datasets
+#funcao que converte de timestamp para mes
+ConvertTimestampForMonth <- function(x){
+  a = as.POSIXct(x, origin = '1970-01-01')
+  result <- as.Date(as.POSIXct(x, origin = '1970-01-01'))
+  return (result)
+}
 
+
+#Carregando datasets
 ratings <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/ratings.csv")
 movies <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/movie-genre.csv")
 ratings.filme <- read.csv("~/Documentos/SegundoPeriodo/DataAnalysis/Inference/ml-latest-small/ratings-por-filme.csv")
@@ -33,6 +40,11 @@ movies$genre = as.character(movies$genre)
 movies.analyzed = movies %>% filter(movies$genre %in% GENEROS)
 #filtrando os rantings 
 ratings.analyzed = ratings %>% filter(ratings$movieId %in% movies.analyzed$movieId)
+#o dataset que será utilizado
+data = full_join(ratings.analyzed, movies.analyzed, by = "movieId")
+#Transformando o timestamp em mês
+data <- mutate(data, month = months(ConvertTimestampForMonth(timestamp))) %>% select( -timestamp)
+
 
 
 
