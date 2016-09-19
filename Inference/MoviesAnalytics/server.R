@@ -43,7 +43,9 @@ ratings.analyzed = ratings %>% filter(ratings$movieId %in% movies.analyzed$movie
 #o dataset que será utilizado
 data = full_join(ratings.analyzed, movies.analyzed, by = "movieId")
 #Transformando o timestamp em mês
-data <- mutate(data, month = months(ConvertTimestampForMonth(timestamp))) %>% select( -timestamp)
+data <- mutate(data, month = months(ConvertTimestampForMonth(timestamp)))
+#Transformando o timestamp em ano
+data <- mutate(data, year = years(ConvertTimestampForMonth(timestamp)))
 
 
 
