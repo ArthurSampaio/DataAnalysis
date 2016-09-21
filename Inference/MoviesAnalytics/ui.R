@@ -38,6 +38,8 @@ shinyUI(fluidPage(theme = shinytheme("journal"),
   p(tags$a(href = "https://en.wikipedia.org/wiki/The_Matrix", "Matrix")," é uma triologia de ficção científica lançada no ano de 1999. É uma produção americana-australiana e conta
     com a direção e roteiro de The Wachowskis Brothers. O primeiro filme da triologia foi lançado no dia 31 de Março de 1999
     e arrecadou $460 milhões de dólares em todo o mundo."),
+  p("O sucesso da triologia foi imensa, alguns críticos costumam dizer que Matrix (1999) modificou a maneira de fazer cinema. Em decorrência destes fatos, será 
+    que a Triologia Matrix é um saga acima da média para o gênero de Sci-Fi?"),
   
   p("Antes de começar a responder propriamente a questão vamos dar uma analisada nos dados da nossa amostra."),
   p("Abaixo está o gráfico de histograma com a distribuição das avaliações dadas para os filmes do gênero de 
@@ -62,9 +64,31 @@ shinyUI(fluidPage(theme = shinytheme("journal"),
   p("Para responder a questão evidenciada no tópico, irei utilizar técnicas de inferência nas amostras para que as conclusões 
   encontradas possam ser aplicadas a população em geral."),
 
-  mainPanel(
-    plotlyOutput(outputId = "meansSci")
+
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("movie1",
+                  "Escolha o filme: ", 
+                  c(" ", "Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi")),
+      selectInput("movie2",
+                  "Escolha o filme: ", 
+                  c(" ", "Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi")),
+      selectInput("movie3",
+                  "Escolha o filme: ", 
+                  c(" ","Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi")),
+      selectInput("movie4",
+                  "Escolha o filme: ", 
+                  c(" ","Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi"))
+      
+    ),
+    # Show a plot of the generated distribution
+    mainPanel(
+      plotOutput(outputId = "meansSciFi")
+    )
+    
   )
+
+    
 
   
   

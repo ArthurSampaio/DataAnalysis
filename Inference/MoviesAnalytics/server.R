@@ -95,12 +95,13 @@ shinyServer(function(input, output) {
     p
   })
   
-  output$meansSci <- renderPlotly({
-    gg = ggplot(dSci, aes(x = title , ymin = X2.5., ymax = X97.5.)) +
+  output$meansSciFi <- renderPlot({
+  
+    dSci %>% filter(title %in% c(input$movie1, input$movie2, input$movie3, input$movie4)) %>%
+    ggplot(aes(x = title , ymin = X2.5., ymax = X97.5.)) +
       geom_errorbar() + 
       labs(title = "Média das avaliações dos espectadores", x = "Filmes", y = "Média")
-    p <- ggplotly(gg)
-    p
+   
   })
   
 })
