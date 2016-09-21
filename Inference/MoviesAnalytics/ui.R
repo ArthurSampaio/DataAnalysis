@@ -64,21 +64,20 @@ shinyUI(fluidPage(theme = shinytheme("journal"),
   p("Para responder a questão evidenciada no tópico, irei utilizar técnicas de inferência nas amostras para que as conclusões 
   encontradas possam ser aplicadas a população em geral."),
 
-
   sidebarLayout(
     sidebarPanel(
       selectInput("movie1",
                   "Escolha o filme: ", 
-                  c(" ", "Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi")),
+                  c(" ", "Matrix, The (1999)")),
       selectInput("movie2",
                   "Escolha o filme: ", 
-                  c(" ", "Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi")),
+                  c(" ", "Matrix Revolutions, The (2003)")),
       selectInput("movie3",
                   "Escolha o filme: ", 
-                  c(" ","Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi")),
+                  c(" ","Matrix Reloaded, The (2003)")),
       selectInput("movie4",
                   "Escolha o filme: ", 
-                  c(" ","Matrix, The (1999)", "Matrix Revolutions, The (2003)", "Matrix Reloaded, The (2003)", "All SciFi"))
+                  c(" ","All SciFi"))
       
     ),
     # Show a plot of the generated distribution
@@ -86,9 +85,51 @@ shinyUI(fluidPage(theme = shinytheme("journal"),
       plotOutput(outputId = "meansSciFi")
     )
     
-  )
+  ),
 
-    
+  sidebarLayout(
+    sidebarPanel(),
+      # ANALISES  
+      mainPanel(
+        textOutput("analises")
+      )
+    ),
+
+  h3("Qual é o melhor filme da Triologia Matrix?"),
+  p("Como é possível observar na análise do gráfico de erros acima, é evidente que o melhor filme da triologia é o seu primeiro filme, 
+    lançado em 1999!"),
+
+  h3("Na amostra do MovieLens, como é a distribuição dos dados para a triologia Matrix?"),
+
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("filme1",
+                  "Escolha o filme: ", 
+                  c(" ", "Matrix, The (1999)")),
+      selectInput("filme2",
+                  "Escolha o filme: ", 
+                  c(" ", "Matrix Revolutions, The (2003)")),
+      selectInput("filme3",
+                  "Escolha o filme: ", 
+                  c(" ","Matrix Reloaded, The (2003)"))
+  
+      
+    ),
+    # Show a plot of the generated distribution
+    mainPanel(
+      plotlyOutput(outputId = "variationSciFi")
+    )
+  
+  ),
+  
+  p("As notas variam de 0.5 até 5. Como esperado Matrix (1999) possui a maior concentração de valores em torno da mediana de 4.5. Contudo, o não 
+    esperado era este filme ter outliers abaixo do esperado, ou seja, há notas abaixo do primeiro quartil. Na amostra, os filmes Revolutions e Reloaded, 
+    possuem seus valores concentrados entorno das suas medianas, 3 e 3.5, respectivamente.")
+  
+  
+
+
+ 
 
   
   
