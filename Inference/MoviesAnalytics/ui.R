@@ -10,13 +10,14 @@
 library(shiny)
 
 # Define UI for application that draws a histogram
-shinyUI(fluidPage(
+shinyUI(fluidPage(theme = shinytheme("journal"),
   
   # Application title
   titlePanel("Uma análise dos filmes"),
-  h4("Como se comportam os admirados da sétima arte?", align = "center"),
+  h4("Como se comportam os admiradores da sétima arte?", align = "center"),
   h5("Por", tags$a(href= "https://www.linkedin.com/in/arthursampaiopcorreia?", "Arthur Sampaio"), align = "right"),
   
+
 
   h2("Resumo"),
   p("Neste pequeno relatório utilizei dados coletados por um sistema de recomendação, o ", tags$a(href="http://movielens.org", "MovieLens")," 
@@ -32,28 +33,42 @@ shinyUI(fluidPage(
     constituem cerca de 10 variáveis com informações de desde o título até as notas obtidas por cada um dos usuários."),
   p("Para nortear a nossa análise irei responder algumas perguntas nos próximos tópicos."),
   
-  h2("Como é o mapa anual dos gêneros?"),
+  h2("Os filmes da triologia Matrix possui melhores avaliações que a média dos filmes do gênero Sci-Fi (ficção científica)? "),
   
-  p("O cinema é uma das artes que mais possuem gêneros. Assim como a sociedade, o cinema se reinventa paralelo as transformações sociais, políticas e
-    econômicas, por conta disto novos gêneros de filmes são inventados todos os anos. Por conta disto, pesquisei quais são os principais gêneros de filmes,
-    e segundo o", tags$a(href ="http://cultura.culturamix.com/eventos/cinema/generos-do-cinema-conheca-os-principais", "CulturaMix"), "os principais gêneros
-    são:", tags$em("Ação, Musical, Documentário, Comédia, Drama, Romance e Supense/Terror.")),
-  p("O objetivo desta seção é compreender em quais épocas do ano determinado gênero é mais popular entre as pessoas que assistem filmes regularmente."),
+  p(tags$a(href = "https://en.wikipedia.org/wiki/The_Matrix", "Matrix")," é uma triologia de ficção científica lançada no ano de 1999. É uma produção americana-australiana e conta
+    com a direção e roteiro de The Wachowskis Brothers. O primeiro filme da triologia foi lançado no dia 31 de Março de 1999
+    e arrecadou $460 milhões de dólares em todo o mundo."),
   
-  
+  p("Antes de começar a responder propriamente a questão vamos dar uma analisada nos dados da nossa amostra."),
+  p("Abaixo está o gráfico de histograma com a distribuição das avaliações dadas para os filmes do gênero de 
+    Sci-Fi. Para ajudar na compreensão do gráfico, o tamanho da barra é proporcional a quantidade de avaliações numa 
+    nota x. Assim, é possível perceber que os usuários atribuíram, na maioria das vezes, notas entre 3 e 4 pontos para os filmes deste gênero."),
+
+# Exploração dos dados (Histograma, e boxplot) ----------------------------
+
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
-       sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30)
+      sliderInput("bins", "Aumente o diminua a precisão da visualização:",
+                  min = 1, max = 50, value = 10)
     ),
     
     # Show a plot of the generated distribution
     mainPanel(
-       plotOutput("distPlot")
+      plotlyOutput(outputId = "histogramSciFi")
     )
+  ),
+
+  p("Para responder a questão evidenciada no tópico, irei utilizar técnicas de inferência nas amostras para que as conclusões 
+  encontradas possam ser aplicadas a população em geral."),
+
+  mainPanel(
+    plotlyOutput(outputId = "meansSci")
   )
+
+  
+  
+
+
 ))
+
