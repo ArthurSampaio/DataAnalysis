@@ -1,0 +1,130 @@
+---
+title: "Aplicação de Regressão Linear nos dados de SpeedDating"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 8
+    theme: readable
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  require(GGally)
+  library(ggdendro)
+  library(knitr)
+  library(resample)
+  library(tidyr)
+  library(modelr) 
+  library(broom)
+  require(ISLR)
+  theme_set(theme_bw())
+```
+
+
+#Os dados
+
+Os dados utilizados neste relatório descreve cerca de 5000 encontros relâmpagos, conhecidos no exterior como SpeedDating. Todas as informações foram recolhidas inicialmente por professores da Columbia Business School. Todos os participantes após um encontro de 4 minutos preenchia uma ficha com as informações pedidas pelos pesquisadores. 
+
+#O que iremos estudar? 
+
+Nosso principal objetivo é responder duas perguntas que descrevam o comportamento dos dados através de técnicas de regressões lineares. Contudo, como toda boa análise, antes de começar a pensar em equações vamos dar uma olha nos dados. 
+
+##Uma rápida olhadinha nos dados. 
+
+```{r, echo=FALSE}
+speed.dating <- read.csv("~/Documentos/Graduation/DataAnalysis/LinearRegression/data/speed-dating.csv")
+
+speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
+speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
+
+
+```
+
+Os detalhes de cada encontro são distribuidas em 27 variáveis (para mais informações sobre os [dados](https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating) com informações de ambos os participantes.
+
+```{r, echo=FALSE}
+head(speed.dating, 1)
+```
+
+Acima é possível observar todas as variáveis presentes no dataset. A variável __like__ será nossa variável dependente e iremos focar nosso estudo em torno dela. Para isto, vamos observar a distribuição dos dados. 
+
+```{r, echo=FALSE}
+
+p <- ggplot(speed.dating, aes(x=like)) + geom_histogram(bins = 25)+
+  labs(title = "Distribuição dos Likes", x = "Like", y ="Quantidade de notas dadas")
+
+  (gg <- ggplotly(p))
+
+```
+
+É possível notar que a maior das notas dadas para o like estão entre em 5 e 7.5. Ao observar os dados acima me pergunto: Será que há alguma diferença entre as notas que homens e mulheres dão? 
+
+Respondo tal questão observando o gráfico abaixo, é notório que a distribuição dos dados entre Homens e Mulheres é praticamente iguais. A mediana dos dados, valor em que há mais pontos no entorno, é de 6.0 para ambos os sexos. Além disto, é possível ter mais informações como valores extremos e os quartiles. 
+
+
+```{r, echo=FALSE}
+  p <- ggplot(speed.dating, aes(x= gender, y= like, fill = gender)) +   geom_boxplot() + 
+  geom_point(position = position_jitter(width = .3), 
+             alpha = .2) +
+  theme(legend.position="none") +
+  labs(title = "Distribuição dos Likes por Sexo", x = "Sexo", y ="Like")
+
+  (gg <- ggplotly(p))
+```
+
+
+#Com o passar dos encontros há alguma alteração na maneira de dar notas para os seus parceiros de encontros? 
+
+
+```{r}
+tv.model = lm(like ~ attr + fun + intel + prob, data = speed.dating)
+speed = speed.dating %>% add_predictions(tv.model) %>% add_residuals(tv.model)
+#ESTOU AQUI ADIANTANDO A VIDA O COISINHA kkkk 
+tidy(tv.model, conf.int = TRUE)
+glance(tv.model, conf.int = TRUE)
+
+speed %>% 
+  ggplot(aes(x = attr)) + geom_line(aes(y = pred), size = 2, colour = "red") + 
+    geom_point(aes(y = like))
+
+```
+
+
+```{r}
+tv.model = lm(Sales ~ TV, data = advertising)
+
+advertising2 = advertising %>% 
+  add_predictions(tv.model) %>% 
+  add_residuals(tv.model)
+
+
+
+# Modelo x dados
+advertising2 %>% 
+  ggplot(aes(x = TV)) + 
+  geom_line(aes(y = pred), size = 2, colour = "blue") + 
+  geom_point(aes(y = Sales))
+```
+
+
+
+
+
+
+
+
+
+
+
+
