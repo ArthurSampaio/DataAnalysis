@@ -3,7 +3,7 @@ title: "Aplicação de Regressão Linear nos dados de SpeedDating"
 output:
   html_document:
     fig_height: 5
-    fig_width: 8
+    fig_width: 10
     theme: readable
     toc: yes
     toc_float: yes
@@ -84,15 +84,52 @@ Respondo tal questão observando o gráfico abaixo, é notório que a distribui�
 ```
 
 
-#Com o passar dos encontros há alguma alteração na maneira de dar notas para os seus parceiros de encontros? 
+#Quais as características que mais agradam as mulheres?  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+speed.dating.woman = speed.dating  %>% filter(gender == "Mulher")
+
+```
+
+Para responder esta pergunta pesquisei na internet quais as características que mulheres mais gostam nos homens.
+No site [Atitude](https://atitude.com/o-que-as-mulheres-procuram-nos-homens/) as características que mulheres mais gostam são a personalidade, aparência, inteligência e bom humor. 
+
+Dentre os dados que possuo, escolhi _fun_ para representar o quão bom é o humor do parceiro, _intel_ para a inteligência, _attr_ para boa aparência física e para o personalidae escolhi a variável _shar_ que representa quanto os parceiros compartilham interesses e hobbies, pois, é natural que gostamos mais de pessoas que compartilham interesses em comum consco. 
+
+Dando uma rápida olha nestes dados, temos: 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+speed.dating.woman %>% select(fun, intel, attr, shar,like) %>% ggpairs()
+```
+
+Como esperado - por causa da pesquisa previamente feita - as mulheres tendem a dar maiores notas conforme o humor do parceiro seja quantitivamente maior, apresentando um _índice de correlação de 0.703_. Da mesma forma é notável que todas as váriaveis apresentam uma correlação entre si. 
+
+Utilizando técnicas de Regressão Linear irei verificar se as variáveis apresentas acima representam uma parte significativa dos dados. 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+woman.model = lm(like ~ fun + intel + attr + shar, data = speed.dating.woman)
+tidy(woman.model, conf.int = TRUE)
+```
+
+A equação será da forma $f = -0.26 + 0.23*fun + 0.22 *intel + 0.30 *attr + 0.25 *shar$. A variação dos valores das variáveis independetes é em média de 0.03. Outras informações sobre a qualidade da regressão pode ser encontrada acima. 
+
+Ademais, este modelo representa cerca de 70% ($R^{2} =  0.6924$ ) dos dados como pode ser visto abaixo. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+glance(woman.model, conf.int = T)
+```
 
 
-```{r}
-tv.model = lm(like ~ attr + fun + intel + prob, data = speed.dating)
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+glance(woman.model, conf.int = TRUE)
+tv.model = lm(like ~ shar, data = speed.dating.woman)
 speed = speed.dating %>% add_predictions(tv.model) %>% add_residuals(tv.model)
 #ESTOU AQUI ADIANTANDO A VIDA O COISINHA kkkk 
 tidy(tv.model, conf.int = TRUE)
 glance(tv.model, conf.int = TRUE)
+autoplot(tv.model)
 
 speed %>% 
   ggplot(aes(x = attr)) + geom_line(aes(y = pred), size = 2, colour = "red") + 
@@ -101,21 +138,7 @@ speed %>%
 ```
 
 
-```{r}
-tv.model = lm(Sales ~ TV, data = advertising)
 
-advertising2 = advertising %>% 
-  add_predictions(tv.model) %>% 
-  add_residuals(tv.model)
-
-
-
-# Modelo x dados
-advertising2 %>% 
-  ggplot(aes(x = TV)) + 
-  geom_line(aes(y = pred), size = 2, colour = "blue") + 
-  geom_point(aes(y = Sales))
-```
 
 
 
