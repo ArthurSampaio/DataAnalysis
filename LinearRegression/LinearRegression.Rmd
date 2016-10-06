@@ -83,6 +83,9 @@ Respondo tal questão observando o gráfico abaixo, é notório que a distribui�
   (gg <- ggplotly(p))
 ```
 
+Através do boxplot acima é possível percever que neste experimento, apenas dois homens derão nota 0 para uma parceira e em contraposição as mulheres derão 5 notas zeros. Ainda mais, é perceptivel que os homens avaliam melhor as mulheres do que as mulheres avaliam os homens. Diante disto, será que as mulheres são mais exigentes que os homens? E quais os atributos que mais agradam as mulheres?
+
+É sobre a segunda questão que irei discorrer no próximo tópico. 
 
 #Quais as características que mais agradam as mulheres?  
 
