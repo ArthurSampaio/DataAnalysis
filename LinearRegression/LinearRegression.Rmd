@@ -43,7 +43,7 @@ Nosso principal objetivo é responder duas perguntas que descrevam o comportamen
 ##Uma rápida olhadinha nos dados. 
 
 ```{r, echo=FALSE}
-speed.dating <- read.csv("~/Documentos/Graduation/DataAnalysis/LinearRegression/data/speed-dating.csv")
+speed.dating <- read.csv("~/DataAnalysis/LinearRegression/data/speed-dating.csv")
 
 speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
 speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
@@ -57,7 +57,8 @@ Os detalhes de cada encontro são distribuidas em 27 variáveis (para mais infor
 head(speed.dating, 1)
 ```
 
-Acima é possível observar todas as variáveis presentes no dataset. A variável __like__ será nossa variável dependente e iremos focar nosso estudo em torno dela. Para isto, vamos observar a distribuição dos dados. 
+Acima é possível observar todas as variáveis presentes no dataset. A variável __like__ será nossa variável dependente e iremos focar nosso estudo em torno dela. Para isto, vamos observar o seu comportamento. 
+
 
 ```{r, echo=FALSE}
 
@@ -68,9 +69,17 @@ p <- ggplot(speed.dating, aes(x=like)) + geom_histogram(bins = 25)+
 
 ```
 
-É possível notar que a maior das notas dadas para o like estão entre em 5 e 7.5. Ao observar os dados acima me pergunto: Será que há alguma diferença entre as notas que homens e mulheres dão? 
+É possível notar que a maior das notas dadas para o like estão entre em 5 e 7.5. Ainda continuando com a nossa análise, vamos observar uma sumarização da nossa variável estudada: __like__. 
 
-Respondo tal questão observando o gráfico abaixo, é notório que a distribuição dos dados entre Homens e Mulheres é praticamente iguais. A mediana dos dados, valor em que há mais pontos no entorno, é de 6.0 para ambos os sexos. Além disto, é possível ter mais informações como valores extremos e os quartiles. 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+summary(speed.dating$like)
+```
+
+A média das avaliações dos parceiros é muito próxima da mediana, 6.0. Como esperado, os mínimos e máximos das avaliações são respectivamente 0 e 10. Abaixo ploto um gráfico que evidencia a distribuição dos dados.
+
+Ao observar os dados acima me pergunto: Será que há alguma diferença entre as notas que homens e mulheres dão? 
+
+Respondo tal questão observando o gráfico abaixo, é notório que a distribuição dos dados entre Homens e Mulheres é praticamente iguais. A mediana dos dados, valor em que há mais pontos no entorno, é de 6.0 para ambos os sexos. Além disto, é possível ter mais informações como valores extremos e os quartiles.
 
 
 ```{r, echo=FALSE}
@@ -109,18 +118,43 @@ speed.dating.woman %>% select(fun, intel, attr, shar,like) %>% ggpairs()
 Como esperado - por causa da pesquisa previamente feita - as mulheres tendem a dar maiores notas conforme o humor do parceiro seja quantitivamente maior, apresentando um _índice de correlação de 0.703_. Da mesma forma é notável que todas as váriaveis apresentam uma correlação entre si. 
 
 Utilizando técnicas de Regressão Linear irei verificar se as variáveis apresentas acima representam uma parte significativa dos dados. 
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 woman.model = lm(like ~ fun + intel + attr + shar, data = speed.dating.woman)
-tidy(woman.model, conf.int = TRUE)
+
+p <- ggplot(speed.dating.woman, aes(x = fun, y = like)) + 
+  geom_point(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE)
+
+(gg <- ggplotly(p))
+
 ```
 
-A equação será da forma $f = -0.26 + 0.23*fun + 0.22 *intel + 0.30 *attr + 0.25 *shar$. A variação dos valores das variáveis independetes é em média de 0.03. Outras informações sobre a qualidade da regressão pode ser encontrada acima. 
+O gráfico acima, like x fun, mostra a distribuição dos likes a partir dos pontos em fun. Infelizmente como modelamos a reta com mais de um parâmetro fica inviável representar todas as variáveis independentes. 
 
-Ademais, este modelo representa cerca de 70% ($R^{2} =  0.6924$ ) dos dados como pode ser visto abaixo. 
+A reta em azul representa a equação encontrada para descrever a maioria dos dados. Como as notas são dadas num intervalo fechado é esperado que haja várias notas distintas para um mêsmo valor de _fun_. 
+
+<!--Aqui tem de vir falando sobre o gráfico-->
+
+```{r}
+tidy(woman.model, conf.int = T)
+```
+
+
+A equação para a nossa reta será da forma $f = -0.26 + 0.23*fun + 0.22 *intel + 0.30 *attr + 0.25 *shar$. A variação dos valores das variáveis independetes é em média de 0.03. Outras informações sobre a qualidade da regressão pode ser encontrada acima. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 glance(woman.model, conf.int = T)
 ```
+
+Ademais, este modelo representa cerca de 70% ($R^{2} =  0.6924$ ) dos dados como pode ser visto abaixo. 
+A seguir é plotado o scaterplot da nossa fit. 
+
+```{r}
+autoplot(woman.model)
+```
+
+Assim, as caractéristicas mencionadas no começo desta seção representa, com 95% de confiabilidade, as principais características que as mulheres preferem nos homens. A regressão linear encontrada representa 70% dos dados. 
+
 
 
 
