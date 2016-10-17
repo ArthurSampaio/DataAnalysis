@@ -3,7 +3,7 @@ title: "Aplicação de Regressão Logística"
 output:
   html_document:
     fig_height: 5
-    fig_width: 10
+    fig_width: 8
     theme: readable
     toc: yes
     toc_float: yes
@@ -20,6 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
   library(dplyr)
   library(cluster)
   library(plotly)
+  library(pscl)
   require(GGally)
   library(ggdendro)
   library(knitr)
@@ -46,31 +47,71 @@ Nosso principal objetivo é responder duas perguntas que descrevam o comportamen
 
 ##Uma rápida olhadinha nos dados. 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 speed.dating <- read.csv("~/Documentos/DataAnalysis/Regression/data/speed-dating2.csv")
 
 speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
 speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
+speed.dating$dec = ordered(speed.dating$dec, levels = c("yes", "no"), c(1,0))
+#1 == deu match
+#0 == deu negado
 ```
 
 Os detalhes de cada encontro são distribuidas em mais 27 variáveis (para mais informações sobre os [dados](https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating) com informações de ambos os participantes.
 
+A média das avaliações dos parceiros é muito próxima da mediana, 6.0. Como esperado, os mínimos e máximos das avaliações são respectivamente 0 e 10. Abaixo ploto um gráfico que evidencia a distribuição dos dados.
+
+Ao observar os dados acima me pergunto: Será que há alguma diferença entre as notas que homens e mulheres dão? 
+
+Respondo tal questão observando o gráfico abaixo, é notório que a distribuição dos dados entre Homens e Mulheres é praticamente iguais. A mediana dos dados, valor em que há mais pontos no entorno, é de 6.0 para ambos os sexos. Além disto, é possível ter mais informações como valores extremos e os quartiles.
+
 ```{r, echo=FALSE}
-head(speed.dating, 1)
-```
-
-Acima é possível observar todas as variáveis presentes no dataset. A variável __like__ será nossa variável dependente e iremos focar nosso estudo em torno dela. Para isto, vamos observar o seu comportamento. 
-
-
-```{r, echo=FALSE}
-
-p <- ggplot(speed.dating, aes(x=like)) + geom_histogram(bins = 25)+
-  labs(title = "Distribuição dos Likes", x = "Like", y ="Quantidade de notas dadas")
+  p <- ggplot(speed.dating, aes(x= gender, y= like, fill = gender)) +   geom_violin() + 
+  geom_point(position = position_jitter(width = .3), 
+             alpha = .2) +
+  theme(legend.position="none") +
+  labs(title = "Distribuição dos Likes por Sexo", x = "Sexo", y ="Like")
 
   (gg <- ggplotly(p))
-
 ```
 
+Através do boxplot acima é possível percever que neste experimento, apenas dois homens derão nota 0 para uma parceira e em contraposição as mulheres derão 5 notas zeros. 
 
+### Em um speed dating quais as características que promovem match entre os participantes?
 
+De acordo com o [Scientific American](https://www.scientificamerican.com/article/shopping-for-love/) em Speed Dating com muitas pessoas, as características que mais fazem os parceiros se relacionarem são as que podem ser vistas num primeiro contato, como altura, idade, atratividade física e outras características que são observadas num curto encontro. 
+
+#1.  Que fatores nos dados têm efeito significativo na chance do casal ter um match?
+
+Com base no encontrado no artigo da _Scientific American_ as variáveis que irei estudar são:  _fun_ para representar o quão bom é o humor do parceiro, _intel_ para a inteligência, _attr_ para boa aparência física e para o personalidae escolhi a variável _shar_ que representa quanto os parceiros compartilham interesses e hobbies, pois, é natural que gostamos mais de pessoas que compartilham interesses em comum.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+data.used = speed.dating %>% select(fun, intel, attr, shar, dec)
+ggpairs(data.used)
+```
+
+No plot acima é possível perceber que a maioria dos encontros não resultaram em match, e que as notas para as quatro características daqueles que não obtiveram match possuem um valor concentrado em torno de 5 pontos. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+p <- ggplot(data.used, aes(x = shar, y = dec)) + geom_count(alpha = .5) + labs(title = "Variação dos Matchs", x = "Interesses em comuns", y = "Match")
+(gg <- ggplotly(p))
+```
+
+Há uma relação muito interessante na visualização acima. Quando os parceiros possuem interesses em comum (acima de 5) o casal tendem a dar match entre si. 
+
+```{r}
+match = glm(dec ~ fun + intel + attr + shar, data = data.used, family = "binomial")
+# y = exp(b0)*exp(b1*x1)*...exp(bn*xn),
+```
+
+A equação da nossa fit é na forma, 
+$y = e^{-5,45}*e^{0,20 * fun} * e^{-0,16 * intel} * e^{0,54 * attr } * e^{0,29 * shar}$, contudo para facilitar a interpretação, irei encontrar o valor de cada termo já exponenciado. Cada termo pode ser encontrado abaixo:
+
+```{r, echo=FALSE}
+tidy(match, conf.int = TRUE, exponentiate = T)
+```
+
+Isolando cada termo podemos tirar algumas __conclusões__: 
+
+* A cada ponto em
 

@@ -83,7 +83,7 @@ Respondo tal questão observando o gráfico abaixo, é notório que a distribui�
 
 
 ```{r, echo=FALSE}
-  p <- ggplot(speed.dating, aes(x= gender, y= like, fill = gender)) +   geom_boxplot() + 
+  p <- ggplot(speed.dating, aes(x= gender, y= like, fill = gender)) +   geom_violin() + 
   geom_point(position = position_jitter(width = .3), 
              alpha = .2) +
   theme(legend.position="none") +
