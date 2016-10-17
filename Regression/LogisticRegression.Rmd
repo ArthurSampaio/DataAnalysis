@@ -35,6 +35,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #Os dados
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+speed.dating <- read.csv("~/Documentos/DataAnalysis/Regression/data/speed-dating2.csv")
+
+speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
+speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
+speed.dating$dec = ordered(speed.dating$dec, levels = c("no", "yes"), c(0,1))
+
+#1 == deu match
+#0 == deu negado
+```
+
 Os dados utilizados neste relatório descreve cerca de 5000 encontros relâmpagos, conhecidos no exterior como SpeedDating. Todas as informações foram recolhidas inicialmente por professores da Columbia Business School. Todos os participantes após um encontro de 4 minutos preenchia uma ficha com as informações pedidas pelos pesquisadores. 
 
 #O que iremos estudar? 
@@ -47,18 +58,19 @@ Nosso principal objetivo é responder duas perguntas que descrevam o comportamen
 
 ##Uma rápida olhadinha nos dados. 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-speed.dating <- read.csv("~/Documentos/DataAnalysis/Regression/data/speed-dating2.csv")
+Os detalhes de cada encontro são distribuidas em mais 27 variáveis (para mais informações sobre os [dados](https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating) com informações de ambos os participantes.
 
-speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
-speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
-speed.dating$dec = ordered(speed.dating$dec, levels = c("no", "yes"), c(0,1))
+Para que ocorra um match, é necessário que o parceiro1 goste do parceiro2. Em decorrência disto, ploto o histograma da variável _like_ para enterdermos melhor os dados. 
 
-#1 == deu match
-#0 == deu negado
+```{r, echo=FALSE}
+
+p <- ggplot(speed.dating, aes(x=like)) + geom_histogram(bins = 25)+
+  labs(title = "Distribuição dos Likes", x = "Like", y ="Quantidade de notas dadas")
+
+  (gg <- ggplotly(p))
+
 ```
 
-Os detalhes de cada encontro são distribuidas em mais 27 variáveis (para mais informações sobre os [dados](https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating) com informações de ambos os participantes.
 
 A média das avaliações dos parceiros é muito próxima da mediana, 6.0. Como esperado, os mínimos e máximos das avaliações são respectivamente 0 e 10. Abaixo ploto um gráfico que evidencia a distribuição dos dados.
 
@@ -131,7 +143,7 @@ Nossa fit representa aproximadamente 54% dos dados. O pseudo $R^{2}$ da equaçã
 pR2(match)
 ```
 
-##2.  Que fatores nos dados têm mais efeito na chance de um casal ter match?
+#2.  Que fatores nos dados têm mais efeito na chance de um casal ter match?
 
 Para responder tal questão, irei plotar o gráfico da predição da equação para as quatro variáveis. 
 
@@ -183,5 +195,6 @@ Para interpretar os gráficos basta acompanha a curva, da esquerda para direita,
 A variável que menos contribui para o casal ter um match é a _Inteligência_. Tal informação está de acordo com a pesquisa levantada por mim, pois, pessoas em encontros rápidos, 3 a 5 minutos, tendem a prestar atenção em características mais palpáveis para escolher seus parceiros ao invés de características mais subjetivas como a inteligência. 
 
 As variáveis que mais contribuem com o match, são a aparência física (como esperado) e o interesse em coisas em comuns entre os dois membros do casal. 
+
 
 
