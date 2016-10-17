@@ -1,0 +1,252 @@
+---
+title: "Aplicação de Regressão Linear nos dados de SpeedDating"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 10
+    theme: readable
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  require(GGally)
+  library(ggdendro)
+  library(knitr)
+  library(resample)
+  library(tidyr)
+  library(modelr) 
+  library(broom)
+  require(ISLR)
+  theme_set(theme_bw())
+```
+
+
+#Os dados
+
+Os dados utilizados neste relatório descreve cerca de 5000 encontros relâmpagos, conhecidos no exterior como SpeedDating. Todas as informações foram recolhidas inicialmente por professores da Columbia Business School. Todos os participantes após um encontro de 4 minutos preenchia uma ficha com as informações pedidas pelos pesquisadores. 
+
+#O que iremos estudar? 
+
+Nosso principal objetivo é responder duas perguntas que descrevam o comportamento dos dados através de técnicas de regressões lineares. Contudo, como toda boa análise, antes de começar a pensar em equações vamos dar uma olha nos dados. 
+
+##Uma rápida olhadinha nos dados. 
+
+```{r, echo=FALSE}
+speed.dating <- read.csv("~/DataAnalysis/LinearRegression/data/speed-dating.csv")
+
+speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
+speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
+
+
+```
+
+Os detalhes de cada encontro são distribuidas em 27 variáveis (para mais informações sobre os [dados](https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating) com informações de ambos os participantes.
+
+```{r, echo=FALSE}
+head(speed.dating, 1)
+```
+
+Acima é possível observar todas as variáveis presentes no dataset. A variável __like__ será nossa variável dependente e iremos focar nosso estudo em torno dela. Para isto, vamos observar o seu comportamento. 
+
+
+```{r, echo=FALSE}
+
+p <- ggplot(speed.dating, aes(x=like)) + geom_histogram(bins = 25)+
+  labs(title = "Distribuição dos Likes", x = "Like", y ="Quantidade de notas dadas")
+
+  (gg <- ggplotly(p))
+
+```
+
+É possível notar que a maior das notas dadas para o like estão entre em 5 e 7.5. Ainda continuando com a nossa análise, vamos observar uma sumarização da nossa variável estudada: __like__. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+summary(speed.dating$like)
+```
+
+A média das avaliações dos parceiros é muito próxima da mediana, 6.0. Como esperado, os mínimos e máximos das avaliações são respectivamente 0 e 10. Abaixo ploto um gráfico que evidencia a distribuição dos dados.
+
+Ao observar os dados acima me pergunto: Será que há alguma diferença entre as notas que homens e mulheres dão? 
+
+Respondo tal questão observando o gráfico abaixo, é notório que a distribuição dos dados entre Homens e Mulheres é praticamente iguais. A mediana dos dados, valor em que há mais pontos no entorno, é de 6.0 para ambos os sexos. Além disto, é possível ter mais informações como valores extremos e os quartiles.
+
+
+```{r, echo=FALSE}
+  p <- ggplot(speed.dating, aes(x= gender, y= like, fill = gender)) +   geom_boxplot() + 
+  geom_point(position = position_jitter(width = .3), 
+             alpha = .2) +
+  theme(legend.position="none") +
+  labs(title = "Distribuição dos Likes por Sexo", x = "Sexo", y ="Like")
+
+  (gg <- ggplotly(p))
+```
+
+Através do boxplot acima é possível percever que neste experimento, apenas dois homens derão nota 0 para uma parceira e em contraposição as mulheres derão 5 notas zeros. Ainda mais, é perceptivel que os homens avaliam melhor as mulheres do que as mulheres avaliam os homens. Diante disto, será que as mulheres são mais exigentes que os homens? E quais os atributos que mais agradam as mulheres?
+
+É sobre a segunda questão que irei discorrer no próximo tópico. 
+
+#Quais as características que mais agradam as mulheres?  
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+speed.dating.woman = speed.dating  %>% filter(gender == "Mulher")
+
+```
+
+Para responder esta pergunta pesquisei na internet quais as características que mulheres mais gostam nos homens.
+No site [Atitude](https://atitude.com/o-que-as-mulheres-procuram-nos-homens/) as características que mulheres mais gostam são a personalidade, aparência, inteligência e bom humor. 
+
+Dentre os dados que possuo, escolhi _fun_ para representar o quão bom é o humor do parceiro, _intel_ para a inteligência, _attr_ para boa aparência física e para o personalidae escolhi a variável _shar_ que representa quanto os parceiros compartilham interesses e hobbies, pois, é natural que gostamos mais de pessoas que compartilham interesses em comum consco. 
+
+Dando uma rápida olha nestes dados, temos: 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+speed.dating.woman %>% select(fun, intel, attr, shar,like) %>% ggpairs()
+```
+
+Como esperado - por causa da pesquisa previamente feita - as mulheres tendem a dar maiores notas conforme o humor do parceiro seja quantitivamente maior, apresentando um _índice de correlação de 0.703_. Da mesma forma é notável que todas as váriaveis apresentam uma correlação entre si. 
+
+Utilizando técnicas de Regressão Linear irei verificar se as variáveis apresentas acima representam uma parte significativa dos dados. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+woman.model = lm(like ~ fun + intel + attr + shar, data = speed.dating.woman)
+
+p <- ggplot(speed.dating.woman, aes(x = fun, y = like)) + 
+  geom_point(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE)
+
+(gg <- ggplotly(p))
+
+```
+
+O gráfico acima, like x fun, mostra a distribuição dos likes a partir dos pontos em fun. Infelizmente como modelamos a reta com mais de um parâmetro fica inviável representar todas as variáveis independentes. 
+
+A reta em azul representa a equação encontrada para descrever a maioria dos dados. Como as notas são dadas num intervalo fechado é esperado que haja várias notas distintas para um mêsmo valor de _fun_. 
+
+
+```{r}
+
+ggplot(woman.model, aes(like, .resid)) + 
+  geom_point(alpha = .4) + 
+  geom_hline(yintercept = 0, colour = "blue")
+
+```
+
+
+```{r}
+tidy(woman.model, conf.int = T)
+```
+
+
+A equação para a nossa reta será da forma $f = -0.26 + 0.23*fun + 0.22 *intel + 0.30 *attr + 0.25 *shar$. A variação dos valores das variáveis independetes é em média de 0.03. Outras informações sobre a qualidade da regressão pode ser encontrada acima. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+glance(woman.model, conf.int = T)
+```
+
+Ademais, este modelo representa cerca de 70% ($R^{2} =  0.6924$ ) dos dados como pode ser visto abaixo. 
+A seguir é plotado o scaterplot da nossa fit. 
+
+```{r}
+autoplot(woman.model)
+```
+
+Assim, as caractéristicas mencionadas no começo desta seção representa, com 95% de confiabilidade, as principais características que as mulheres preferem nos homens. A regressão linear encontrada representa 70% dos dados. 
+
+####Vamos dar uma olhada novamente nos dados?
+
+
+
+```{r, echo=FALSE}
+  p <- ggplot(speed.dating, aes(x= gender, y= like, fill = gender)) +   geom_violin() + 
+  geom_point(position = position_jitter(width = .3), 
+             alpha = .05) +
+  theme(legend.position="none") +
+  labs(title = "Distribuição dos Likes por Sexo", x = "Sexo", y ="Like")
+
+  (gg <- ggplotly(p))
+```
+
+
+
+No gráfico abaixo é possível perceber alguns fatos interessantes que irei elencar. 
+
+1. Na metade inferior do gráfico, a densidade as mulheres é levemente razoavelmente superior a dos homens, ou seja, as mulheres neste conjunto de dados dão mais notas abaixos de 5 do que os homens. 
+
+2. A inversa também pode ser observada, os homens tendem a dar notas ligeiramente superiores as mulheres, enquanto as delas se concentram em torno da mediana. 
+
+######Os homens são menos criteriosos que as mulheres!
+
+Isto já é algo esperado. É possível perceber que o contexto social ao qual o homem se insere pelo simples fato de o ser, preza pela quantidade dos relacionamentos e não a qualidade. Por isto é esperado que homens para obterem uma maior "quantidade" de relacionamentos irão utilizar menos critérios par escolherem suas parceiras. 
+
+
+# O quanto a beleza das mulheres é descreve os nossos dados?
+
+Para isto, irei restringir os dados para os homens para assim estudar este comportamente. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+worst_man = speed.dating %>% filter(gender == "Homem") %>% select(iid, samerace, race, attr, sinc, intel, fun, amb, shar, like)
+
+worst_man %>% select(-iid, -samerace, -race) %>% ggpairs()
+
+```
+
+É possível notar na grade acima,que há um alto grau de correlação positiva entre o quanto o homem acha a parceira bonita e a nota dada. 
+
+```{r}
+
+worst = lm(like ~ attr  , data = worst_man)
+glance(worst, conf.int = T)
+```
+
+Assim, o atributo da aparência da parceira do homem é capaz de descrever cerca de 42% ($R^{2} =  0.6924$ ) dos dados. 
+
+```{r}
+tidy(worst,  conf.int = T)
+```
+
+A equação da nossa fit é $f = 2.33 + 0.61*attr$. A variação do coeficiente do atrivuto é da ordem de 0.06.
+
+```{r}
+p <- ggplot(worst, aes(x = attr, y = like)) + 
+  geom_point(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE)
+
+(gg <- ggplotly(p))
+
+```
+
+É possível notar que grande parte dos dados estão acima a esquerda de attr = 5. 
+
+
+```{r}
+
+p<- ggplot(worst, aes(like, .resid)) + 
+  geom_point(alpha = .4) + 
+  geom_hline(yintercept = 0, colour = "blue")
+
+(gg <- ggplotly(p))
+
+```
+
+Infelimente, como os dados são dados um intervalo fechado, o nosso gráfico residual terá o formato acima, um pouco distinto dos encontrados na literatura. 
+
+
+
+
+
+
+
+
+
+

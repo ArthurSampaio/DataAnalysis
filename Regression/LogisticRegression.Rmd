@@ -1,0 +1,76 @@
+---
+title: "Aplicação de Regressão Logística"
+output:
+  html_document:
+    fig_height: 5
+    fig_width: 10
+    theme: readable
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+  library(ggplot2)
+  library(dplyr)
+  library(ggfortify)
+  library(dplyr)
+  library(cluster)
+  library(plotly)
+  require(GGally)
+  library(ggdendro)
+  library(knitr)
+  library(resample)
+  library(tidyr)
+  library(modelr) 
+  library(broom)
+  require(ISLR)
+  theme_set(theme_bw())
+```
+
+
+#Os dados
+
+Os dados utilizados neste relatório descreve cerca de 5000 encontros relâmpagos, conhecidos no exterior como SpeedDating. Todas as informações foram recolhidas inicialmente por professores da Columbia Business School. Todos os participantes após um encontro de 4 minutos preenchia uma ficha com as informações pedidas pelos pesquisadores. 
+
+#O que iremos estudar? 
+
+Nosso principal objetivo é responder duas perguntas que descrevam o comportamento dos dados através de técnicas de regressões logística. As nossas perguntas são: 
+
+1.  Que fatores nos dados têm efeito significativo na chance do casal ter um match? E como é esse efeito (positivo/negativo)?
+
+2.  Que fatores nos dados têm mais efeito na chance de um casal ter match?
+
+##Uma rápida olhadinha nos dados. 
+
+```{r, echo=FALSE}
+speed.dating <- read.csv("~/Documentos/DataAnalysis/Regression/data/speed-dating2.csv")
+
+speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
+speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
+```
+
+Os detalhes de cada encontro são distribuidas em mais 27 variáveis (para mais informações sobre os [dados](https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating) com informações de ambos os participantes.
+
+```{r, echo=FALSE}
+head(speed.dating, 1)
+```
+
+Acima é possível observar todas as variáveis presentes no dataset. A variável __like__ será nossa variável dependente e iremos focar nosso estudo em torno dela. Para isto, vamos observar o seu comportamento. 
+
+
+```{r, echo=FALSE}
+
+p <- ggplot(speed.dating, aes(x=like)) + geom_histogram(bins = 25)+
+  labs(title = "Distribuição dos Likes", x = "Like", y ="Quantidade de notas dadas")
+
+  (gg <- ggplotly(p))
+
+```
+
+
+
+
