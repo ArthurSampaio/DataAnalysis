@@ -52,7 +52,8 @@ speed.dating <- read.csv("~/Documentos/DataAnalysis/Regression/data/speed-dating
 
 speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
 speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
-speed.dating$dec = ordered(speed.dating$dec, levels = c("yes", "no"), c(1,0))
+speed.dating$dec = ordered(speed.dating$dec, levels = c("no", "yes"), c(0,1))
+
 #1 == deu match
 #0 == deu negado
 ```
@@ -81,12 +82,13 @@ Através do boxplot acima é possível percever que neste experimento, apenas do
 
 De acordo com o [Scientific American](https://www.scientificamerican.com/article/shopping-for-love/) em Speed Dating com muitas pessoas, as características que mais fazem os parceiros se relacionarem são as que podem ser vistas num primeiro contato, como altura, idade, atratividade física e outras características que são observadas num curto encontro. 
 
-#1.  Que fatores nos dados têm efeito significativo na chance do casal ter um match?
+## Trabalhando os dados
 
-Com base no encontrado no artigo da _Scientific American_ as variáveis que irei estudar são:  _fun_ para representar o quão bom é o humor do parceiro, _intel_ para a inteligência, _attr_ para boa aparência física e para o personalidae escolhi a variável _shar_ que representa quanto os parceiros compartilham interesses e hobbies, pois, é natural que gostamos mais de pessoas que compartilham interesses em comum.
+Com base no encontrado no artigo da _Scientific American_ as variáveis que irei estudar são:  _fun_ para representar o quão bom é o humor do parceiro, _intel_ para a inteligência, _attr_ para boa aparência física e para o personalidae escolhi a variável _shar_ que representa quanto os parceiros compartilham interesses e hobbies, pois, é natural que gostamos mais de pessoas que compartilham interesses em comum. 
+
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
-data.used = speed.dating %>% select(fun, intel, attr, shar, dec)
+data.used = speed.dating %>% dplyr::select(fun, intel, attr, shar,dec)
 ggpairs(data.used)
 ```
 
@@ -98,6 +100,10 @@ p <- ggplot(data.used, aes(x = shar, y = dec)) + geom_count(alpha = .5) + labs(t
 ```
 
 Há uma relação muito interessante na visualização acima. Quando os parceiros possuem interesses em comum (acima de 5) o casal tendem a dar match entre si. 
+
+#1.  Que fatores nos dados têm efeito significativo na chance do casal ter um match?
+
+######Para lembrar, o valor 1 indica que houve um match entre o casal. 0, caso contrário
 
 ```{r}
 match = glm(dec ~ fun + intel + attr + shar, data = data.used, family = "binomial")
@@ -111,7 +117,71 @@ $y = e^{-5,45}*e^{0,20 * fun} * e^{-0,16 * intel} * e^{0,54 * attr } * e^{0,29 *
 tidy(match, conf.int = TRUE, exponentiate = T)
 ```
 
+Todas as variáveis analizadas são significativas, pois, o seu intervalo de confiança não inclui o elemento neutro da mutiplicação. 
+
 Isolando cada termo podemos tirar algumas __conclusões__: 
 
-* A cada ponto em
+* A cada ponto em _fun_ (humor), o parceiro tem 1.22 vezes mais chances de dar um match. Assim, o efeito para esta variável é positivo
+* A cada ponto em _intel_ (inteligência), o parceiro diminui 0,15 vezes de dar um match. Assim, o efeito para esta variável é negativo
+* A cada ponto em _attr_ (atratividade física), o parceiro aumenta em 1.72 vezes as chances de dar match. Esta é a variavél que mais contribui para as chances de dar match e por isto seu efeito é positivo. Tal efeito já era esperado, como pode ser visto no link da Scientific American. 
+* A cada ponto em _shar_ (interesses em comuns), o parceiro aumenta em 1.34 vezes as chances de dar match. Como esperado esta é uma variável que contribui positivamente. 
+
+Nossa fit representa aproximadamente 54% dos dados. O pseudo $R^{2}$ da equação encontrada é: 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+pR2(match)
+```
+
+##2.  Que fatores nos dados têm mais efeito na chance de um casal ter match?
+
+Para responder tal questão, irei plotar o gráfico da predição da equação para as quatro variáveis. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#INTEL 
+data = glm(dec ~ intel, data = data.used, family = "binomial")
+ex=  augment(data, type.predict = "response")
+p = ex %>% 
+  mutate(Match = ifelse(dec == "1", 1, 0)) %>% 
+  ggplot(aes(x = intel)) + 
+  geom_count(aes(y = Match), alpha = 0.5) + 
+  geom_line(aes(y = .fitted)) + xlab("Inteligência")
+(gg <- ggplotly(p))
+
+#SHAR
+data = glm(dec ~ shar, data = data.used, family = "binomial")
+ex=  augment(data, type.predict = "response")
+p = ex %>% 
+  mutate(Match = ifelse(dec == "1", 1, 0)) %>% 
+  ggplot(aes(x = shar)) + 
+  geom_count(aes(y = Match), alpha = 0.5) + 
+  geom_line(aes(y = .fitted)) + xlab("Interesses em comum")
+(gg <- ggplotly(p))
+
+#FUN
+data = glm(dec ~ fun, data = data.used, family = "binomial")
+ex=  augment(data, type.predict = "response")
+p = ex %>% 
+  mutate(Match = ifelse(dec == "1", 1, 0)) %>% 
+  ggplot(aes(x = fun)) + 
+  geom_count(aes(y = Match), alpha = 0.5) + 
+  geom_line(aes(y = .fitted)) + xlab("Humor")
+(gg <- ggplotly(p))
+
+#ATTR
+data = glm(dec ~ attr, data = data.used, family = "binomial")
+ex=  augment(data, type.predict = "response")
+p = ex %>% 
+  mutate(Match = ifelse(dec == "1", 1, 0)) %>% 
+  ggplot(aes(x = attr)) + 
+  geom_count(aes(y = Match), alpha = 0.5) + 
+  geom_line(aes(y = .fitted)) + xlab("Atratividade física")
+(gg <- ggplotly(p))
+
+```
+
+Para interpretar os gráficos basta acompanha a curva, da esquerda para direita, e perceber ver onde é o ponto y em x = 10.
+A variável que menos contribui para o casal ter um match é a _Inteligência_. Tal informação está de acordo com a pesquisa levantada por mim, pois, pessoas em encontros rápidos, 3 a 5 minutos, tendem a prestar atenção em características mais palpáveis para escolher seus parceiros ao invés de características mais subjetivas como a inteligência. 
+
+As variáveis que mais contribuem com o match, são a aparência física (como esperado) e o interesse em coisas em comuns entre os dois membros do casal. 
+
 
