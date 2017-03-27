@@ -1,5 +1,6 @@
 ---
 title: "Aplicação de Regressão Linear nos dados de SpeedDating"
+author: "Arthur Sampaio e Laybson Plismenn"
 output:
   html_document:
     fig_height: 5
@@ -32,18 +33,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-#Os dados
+# Os dados
 
 Os dados utilizados neste relatório descreve cerca de 5000 encontros relâmpagos, conhecidos no exterior como SpeedDating. Todas as informações foram recolhidas inicialmente por professores da Columbia Business School. Todos os participantes após um encontro de 4 minutos preenchia uma ficha com as informações pedidas pelos pesquisadores. 
 
-#O que iremos estudar? 
+# O que iremos estudar? 
 
 Nosso principal objetivo é responder duas perguntas que descrevam o comportamento dos dados através de técnicas de regressões lineares. Contudo, como toda boa análise, antes de começar a pensar em equações vamos dar uma olha nos dados. 
 
-##Uma rápida olhadinha nos dados. 
+## Uma rápida olhadinha nos dados. 
 
 ```{r, echo=FALSE}
-speed.dating <- read.csv("~/DataAnalysis/LinearRegression/data/speed-dating.csv")
+speed.dating <- read.csv("~/Documentos/DataAnalysis/Regression/data/speed-dating.csv")
 
 speed.dating$gender =  ordered(speed.dating$gender, levels = c(0,1), c("Mulher", "Homem"))
 speed.dating$race = ordered(speed.dating$race, levels = c(1,2,3,4,5,6), c("Negro", "Caucasiano", "Latino", "Asiatico", "Indio","Outro"))
@@ -96,7 +97,7 @@ Através do boxplot acima é possível percever que neste experimento, apenas do
 
 É sobre a segunda questão que irei discorrer no próximo tópico. 
 
-#Quais as características que mais agradam as mulheres?  
+# Quais as características que mais agradam as mulheres?  
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -163,7 +164,7 @@ autoplot(woman.model)
 
 Assim, as caractéristicas mencionadas no começo desta seção representa, com 95% de confiabilidade, as principais características que as mulheres preferem nos homens. A regressão linear encontrada representa 70% dos dados. 
 
-####Vamos dar uma olhada novamente nos dados?
+####  Vamos dar uma olhada novamente nos dados?
 
 
 
@@ -185,12 +186,12 @@ No gráfico abaixo é possível perceber alguns fatos interessantes que irei ele
 
 2. A inversa também pode ser observada, os homens tendem a dar notas ligeiramente superiores as mulheres, enquanto as delas se concentram em torno da mediana. 
 
-######Os homens são menos criteriosos que as mulheres!
+###### Os homens são menos criteriosos que as mulheres!
 
 Isto já é algo esperado. É possível perceber que o contexto social ao qual o homem se insere pelo simples fato de o ser, preza pela quantidade dos relacionamentos e não a qualidade. Por isto é esperado que homens para obterem uma maior "quantidade" de relacionamentos irão utilizar menos critérios par escolherem suas parceiras. 
 
 
-# O quanto a beleza das mulheres é descreve os nossos dados?
+# O quanto a beleza das mulheres é descrito em nossos nossos dados?
 
 Para isto, irei restringir os dados para os homens para assim estudar este comportamente. 
 
