@@ -1,6 +1,6 @@
 ---
 title: "Aplicação de Regressão Linear nos dados de SpeedDating"
-author: "Arthur Sampaio e Laybson Plismenn"
+author: "Arthur Sampaio"
 output:
   html_document:
     fig_height: 5
