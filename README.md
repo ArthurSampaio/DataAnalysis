@@ -6,6 +6,7 @@ Repositories for Data Analysis I - discipline  the Computer Science in Federal U
 - [What is R?](http://www.revolutionanalytics.com/what-r), artigo introdutório sobre o R da Revolution Analytics.
 - [For Big-Data Scientists, ‘Janitor Work’ Is Key Hurdle to Insights](http://www.nytimes.com/2014/08/18/technology/for-big-data-scientists-hurdle-to-insights-is-janitor-work.html?partner=rss&emc=rss&smid=tw-nytimesscience&_r=1), ótimo artigo do NYT sobre Data Wrangling.
 - [Rseek](http://rseek.org/): Espécie de Google do R
+- [The tidyverse style guide](http://style.tidyverse.org/): Guia de estilo de desenvolvimento em R 
 - [DataCamp](https://www.datacamp.com/courses) - Lista de cursos pagos sobre R
 - [Lista de vagas de emprego de R](http://www.indeed.com.br/empregos?q=%22+R+%22&l=Brasil&radius=25)
 - [Análise da popularidade do R](http://r4stats.com/articles/popularity/)
